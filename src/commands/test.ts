@@ -16,6 +16,27 @@ type CheckResult = {
 };
 
 export async function testCommand(args: string[]): Promise<void> {
+  if (args.includes("--help") || args.includes("-h")) {
+    console.log(`ccron test - Run environment checks for a task
+
+Usage: ccron test <name>
+
+Checks:
+  1. claude CLI found in PATH
+  2. claude auth status (logged in)
+  3. ulimit -n (file descriptors)
+  4. Script file exists
+  5. Script path is outside TCC-protected directories
+  6. Plist registered in launchd
+  7. MCP config exists (if task uses MCP)
+
+Each failed check shows a suggested fix command.
+
+Example:
+  ccron test daily-summary`);
+    return;
+  }
+
   const name = args[0];
   if (!name) {
     console.error("Usage: ccron test <name>");

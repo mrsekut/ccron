@@ -2,6 +2,22 @@ import { readTaskConfig, mcpConfigPath } from "../config";
 import { spawn } from "child_process";
 
 export async function authCommand(args: string[]): Promise<void> {
+  if (args.includes("--help") || args.includes("-h")) {
+    console.log(`ccron auth - Re-authenticate MCP servers for a task
+
+Usage: ccron auth <name>
+
+Opens an interactive claude session with the task's MCP config, allowing
+you to complete OAuth flows for MCP servers (Slack, Linear, etc.).
+The session runs from /tmp to avoid git repo issues.
+
+Exit claude after authentication is complete.
+
+Example:
+  ccron auth daily-summary`);
+    return;
+  }
+
   const name = args[0];
   if (!name) {
     console.error("Usage: ccron auth <name>");

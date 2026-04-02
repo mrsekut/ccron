@@ -1,7 +1,22 @@
 import { listTaskConfigs } from "../config";
 import { listOne } from "../launchd";
 
-export async function listCommand(_args: string[]): Promise<void> {
+export async function listCommand(args: string[]): Promise<void> {
+  if (args.includes("--help") || args.includes("-h")) {
+    console.log(`ccron list - List all registered tasks
+
+Usage: ccron list
+
+Shows all tasks with their schedule, launchd status, and last exit code.
+
+Columns:
+  NAME       Task name
+  SCHEDULE   Cron expression
+  STATUS     "active" (loaded in launchd) or "not loaded"
+  LAST EXIT  Exit code of last execution (0 = success)`);
+    return;
+  }
+
   const tasks = await listTaskConfigs();
 
   if (tasks.length === 0) {

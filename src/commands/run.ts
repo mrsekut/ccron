@@ -3,6 +3,19 @@ import { kickstart } from "../launchd";
 import { spawn } from "child_process";
 
 export async function runCommand(args: string[]): Promise<void> {
+  if (args.includes("--help") || args.includes("-h")) {
+    console.log(`ccron run - Manually trigger a task
+
+Usage: ccron run <name>
+
+Kicks start the task via launchctl and tails the log file in real-time.
+Press Ctrl+C to stop following the log (the task continues running).
+
+Example:
+  ccron run daily-summary`);
+    return;
+  }
+
   const name = args[0];
   if (!name) {
     console.error("Usage: ccron run <name>");

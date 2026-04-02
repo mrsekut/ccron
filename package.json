@@ -8,7 +8,7 @@
   },
   "files": [
     "src",
-    "claude-plugin"
+    "skills"
   ],
   "devDependencies": {
     "@types/bun": "latest",

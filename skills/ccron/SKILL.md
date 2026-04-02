@@ -1,14 +1,14 @@
 ---
-name: cccron
+name: ccron
 description: >
   Schedule claude -p execution on macOS with launchd. Use when the user wants to
   set up recurring claude tasks, manage scheduled prompts, or automate claude CLI runs.
-allowed-tools: 'Read,Write,Bash(cccron:*)'
+allowed-tools: 'Read,Write,Bash(ccron:*)'
 version: '0.1.0'
 author: 'mrsekut'
 ---
 
-# cccron - Schedule claude -p on macOS with launchd
+# ccron - Schedule claude -p on macOS with launchd
 
 Schedule `claude -p` on macOS via launchd. Handles all the tricky launchd setup automatically.
 
@@ -17,26 +17,26 @@ Schedule `claude -p` on macOS via launchd. Handles all the tricky launchd setup 
 When a user asks to run something on a schedule:
 
 1. Create a prompt file (`./prompts/<name>.txt` or similar, git-manageable location)
-2. Register with `cccron add`
-3. Verify with `cccron test <name>`
+2. Register with `ccron add`
+3. Verify with `ccron test <name>`
 
-**Always run `cccron <command> --help` to check the latest options.**
+**Always run `ccron <command> --help` to check the latest options.**
 
 ## Commands
 
 | Command               | Purpose                              |
 | --------------------- | ------------------------------------ |
-| `cccron add`           | Register a scheduled task            |
-| `cccron list`          | List tasks with launchd status       |
-| `cccron show <name>`   | Show detailed task info              |
-| `cccron run <name>`    | Manually trigger and tail log        |
-| `cccron test <name>`   | Run environment checks               |
-| `cccron log <name>`    | Show logs (`--follow` for tail)      |
-| `cccron auth <name>`   | Re-authenticate MCP servers          |
-| `cccron edit <name>`   | Edit config, regenerate and reload   |
-| `cccron remove <name>` | Remove task (`--purge` for logs too) |
+| `ccron add`           | Register a scheduled task            |
+| `ccron list`          | List tasks with launchd status       |
+| `ccron show <name>`   | Show detailed task info              |
+| `ccron run <name>`    | Manually trigger and tail log        |
+| `ccron test <name>`   | Run environment checks               |
+| `ccron log <name>`    | Show logs (`--follow` for tail)      |
+| `ccron auth <name>`   | Re-authenticate MCP servers          |
+| `ccron edit <name>`   | Edit config, regenerate and reload   |
+| `ccron remove <name>` | Remove task (`--purge` for logs too) |
 
-## cccron add Options
+## ccron add Options
 
 ```
 --name <name>           Task name (lowercase, numbers, hyphens)
@@ -73,19 +73,19 @@ Include: completed tasks, tomorrow's plan, blockers.
 EOF
 
 # 2. Register
-cccron add \
+ccron add \
   --name daily-summary \
   --schedule "0 17 * * 1-5" \
   --prompt-file ./prompts/daily-summary.txt \
   --mcp slack
 
 # 3. Verify
-cccron test daily-summary
+ccron test daily-summary
 ```
 
 ## Troubleshooting
 
-- `cccron test` fails: follow the suggested fix commands in the output
-- MCP auth expired: `cccron auth <name>`
+- `ccron test` fails: follow the suggested fix commands in the output
+- MCP auth expired: `ccron auth <name>`
 - Prompt change: just edit the file if using `--prompt-file` (no re-registration needed)
-- Schedule change: `cccron edit <name> --schedule "<cron>"`
+- Schedule change: `ccron edit <name> --schedule "<cron>"`

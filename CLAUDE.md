@@ -38,7 +38,7 @@ src/
   generator.ts     Shell script, plist, MCP config generators (pure functions)
   launchd.ts       launchctl operations (bootstrap, bootout, kickstart, list)
   mcp.ts           MCP preset definitions and config builder
-skills/cccron/
+skills/ccron/
   SKILL.md         Claude Code skill for AI-driven task management
 ```
 

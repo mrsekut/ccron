@@ -64,7 +64,7 @@ describe('generateScriptContent', () => {
       baseGlobal,
     );
     expect(script).toContain('--mcp-config');
-    expect(script).toContain('cccron/mcp/test-task.json');
+    expect(script).toContain('ccron/mcp/test-task.json');
   });
 
   test('allowed tools flag is included', () => {
@@ -91,9 +91,9 @@ describe('generatePlistContent', () => {
     const plist = generatePlistContent(makeTask(), baseGlobal, dailyIntervals);
     expect(plist).toContain('<?xml version="1.0"');
     expect(plist).toContain('<key>Label</key>');
-    expect(plist).toContain('com.cccron.test-task');
+    expect(plist).toContain('com.ccron.test-task');
     expect(plist).toContain('/bin/bash');
-    expect(plist).toContain('cccron-test-task.sh');
+    expect(plist).toContain('ccron-test-task.sh');
     expect(plist).toContain('<key>WorkingDirectory</key>');
     expect(plist).toContain('<string>/tmp</string>');
   });
@@ -128,7 +128,7 @@ describe('generatePlistContent', () => {
     const plist = generatePlistContent(makeTask(), baseGlobal, dailyIntervals);
     expect(plist).toContain('StandardOutPath');
     expect(plist).toContain('StandardErrorPath');
-    expect(plist).toContain('cccron/logs/test-task.log');
+    expect(plist).toContain('ccron/logs/test-task.log');
   });
 });
 

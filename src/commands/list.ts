@@ -3,9 +3,9 @@ import { listOne } from '../launchd';
 
 export async function listCommand(args: string[]): Promise<void> {
   if (args.includes('--help') || args.includes('-h')) {
-    console.log(`cccron list - List all registered tasks
+    console.log(`ccron list - List all registered tasks
 
-Usage: cccron list
+Usage: ccron list
 
 Shows all tasks with their schedule, launchd status, and last exit code.
 
@@ -20,7 +20,7 @@ Columns:
   const tasks = await listTaskConfigs();
 
   if (tasks.length === 0) {
-    console.log('No tasks registered. Use `cccron add` to create one.');
+    console.log('No tasks registered. Use `ccron add` to create one.');
     return;
   }
 

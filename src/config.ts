@@ -26,12 +26,12 @@ export type GlobalConfig = {
 const home = homedir();
 
 export const PATHS = {
-  configDir: join(home, '.config', 'cccron'),
-  tasksDir: join(home, '.config', 'cccron', 'tasks'),
-  mcpDir: join(home, '.config', 'cccron', 'mcp'),
-  globalConfig: join(home, '.config', 'cccron', 'config.json'),
+  configDir: join(home, '.config', 'ccron'),
+  tasksDir: join(home, '.config', 'ccron', 'tasks'),
+  mcpDir: join(home, '.config', 'ccron', 'mcp'),
+  globalConfig: join(home, '.config', 'ccron', 'config.json'),
   binDir: join(home, '.local', 'bin'),
-  logsDir: join(home, '.local', 'share', 'cccron', 'logs'),
+  logsDir: join(home, '.local', 'share', 'ccron', 'logs'),
   launchAgentsDir: join(home, 'Library', 'LaunchAgents'),
 } as const;
 
@@ -44,11 +44,11 @@ export function mcpConfigPath(name: string): string {
 }
 
 export function scriptPath(name: string): string {
-  return join(PATHS.binDir, `cccron-${name}.sh`);
+  return join(PATHS.binDir, `ccron-${name}.sh`);
 }
 
 export function plistPath(name: string): string {
-  return join(PATHS.launchAgentsDir, `com.cccron.${name}.plist`);
+  return join(PATHS.launchAgentsDir, `com.ccron.${name}.plist`);
 }
 
 export function logPath(name: string): string {
@@ -56,7 +56,7 @@ export function logPath(name: string): string {
 }
 
 export function plistLabel(name: string): string {
-  return `com.cccron.${name}`;
+  return `com.ccron.${name}`;
 }
 
 // --- I/O ---

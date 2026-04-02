@@ -11,9 +11,9 @@ import { bootout } from '../launchd';
 
 export async function removeCommand(args: string[]): Promise<void> {
   if (args.includes('--help') || args.includes('-h')) {
-    console.log(`cccron remove - Remove a registered task
+    console.log(`ccron remove - Remove a registered task
 
-Usage: cccron remove <name> [--purge]
+Usage: ccron remove <name> [--purge]
 
 Removes a task by:
   1. Unregistering from launchd (launchctl bootout)
@@ -24,8 +24,8 @@ Options:
   --purge   Also delete log files (logs are kept by default)
 
 Examples:
-  cccron remove daily-summary
-  cccron remove daily-summary --purge`);
+  ccron remove daily-summary
+  ccron remove daily-summary --purge`);
     return;
   }
 
@@ -33,7 +33,7 @@ Examples:
   const name = args.find(a => !a.startsWith('-'));
 
   if (!name) {
-    console.error('Usage: cccron remove <name> [--purge]');
+    console.error('Usage: ccron remove <name> [--purge]');
     process.exit(1);
   }
 

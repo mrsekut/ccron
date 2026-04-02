@@ -17,9 +17,9 @@ type CheckResult = {
 
 export async function testCommand(args: string[]): Promise<void> {
   if (args.includes('--help') || args.includes('-h')) {
-    console.log(`cccron test - Run environment checks for a task
+    console.log(`ccron test - Run environment checks for a task
 
-Usage: cccron test <name>
+Usage: ccron test <name>
 
 Checks:
   1. claude CLI found in PATH
@@ -33,13 +33,13 @@ Checks:
 Each failed check shows a suggested fix command.
 
 Example:
-  cccron test daily-summary`);
+  ccron test daily-summary`);
     return;
   }
 
   const name = args[0];
   if (!name) {
-    console.error('Usage: cccron test <name>');
+    console.error('Usage: ccron test <name>');
     process.exit(1);
   }
 
@@ -106,7 +106,7 @@ async function checkClaudeCli(): Promise<CheckResult> {
     label: 'claude CLI',
     ok: false,
     detail: 'not found in PATH',
-    fix: 'Install claude CLI or set path with cccron config',
+    fix: 'Install claude CLI or set path with ccron config',
   };
 }
 
@@ -170,7 +170,7 @@ async function checkScriptExists(name: string): Promise<CheckResult> {
     label: 'script',
     ok: exists,
     detail: exists ? `exists (${path})` : `not found (${path})`,
-    fix: exists ? undefined : `Re-register: cccron add --name ${name} ...`,
+    fix: exists ? undefined : `Re-register: ccron add --name ${name} ...`,
   };
 }
 
@@ -207,7 +207,7 @@ async function checkPlistRegistered(name: string): Promise<CheckResult> {
     label: 'launchd',
     ok: false,
     detail: fileExists ? 'plist exists but not loaded' : 'plist not found',
-    fix: `Re-register: cccron add --name ${name} ...`,
+    fix: `Re-register: ccron add --name ${name} ...`,
   };
 }
 

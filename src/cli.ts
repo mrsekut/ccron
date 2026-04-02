@@ -4,12 +4,12 @@ const args = process.argv.slice(2);
 const command = args[0];
 
 function printHelp() {
-  console.log(`cccron - Schedule claude -p execution on macOS with launchd
+  console.log(`ccron - Schedule claude -p execution on macOS with launchd
 
 Schedule claude -p execution on macOS via launchd.
 Handles all the tricky launchd setup automatically.
 
-Usage: cccron <command> [options]
+Usage: ccron <command> [options]
 
 Commands:
   add       Register a new scheduled task
@@ -35,24 +35,24 @@ Schedule format (cron expression):
 MCP presets: slack, linear
 
 File locations:
-  Task configs:  ~/.config/cccron/tasks/<name>.json
-  MCP configs:   ~/.config/cccron/mcp/<name>.json
-  Scripts:       ~/.local/bin/cccron-<name>.sh
-  Plists:        ~/Library/LaunchAgents/com.cccron.<name>.plist
-  Logs:          ~/.local/share/cccron/logs/<name>.log
+  Task configs:  ~/.config/ccron/tasks/<name>.json
+  MCP configs:   ~/.config/ccron/mcp/<name>.json
+  Scripts:       ~/.local/bin/ccron-<name>.sh
+  Plists:        ~/Library/LaunchAgents/com.ccron.<name>.plist
+  Logs:          ~/.local/share/ccron/logs/<name>.log
 
 Examples:
-  cccron add --name daily-summary --schedule "15 17 * * 1-5" --prompt-file ./prompts/daily.txt
-  cccron add --name weekly-review --schedule "0 22 * * 5" --prompt "週次レビュー" --mcp slack
-  cccron list
-  cccron show daily-summary
-  cccron test daily-summary
-  cccron edit daily-summary --schedule "0 18 * * 1-5"
-  cccron run daily-summary
-  cccron log daily-summary --follow
-  cccron remove daily-summary
+  ccron add --name daily-summary --schedule "15 17 * * 1-5" --prompt-file ./prompts/daily.txt
+  ccron add --name weekly-review --schedule "0 22 * * 5" --prompt "週次レビュー" --mcp slack
+  ccron list
+  ccron show daily-summary
+  ccron test daily-summary
+  ccron edit daily-summary --schedule "0 18 * * 1-5"
+  ccron run daily-summary
+  ccron log daily-summary --follow
+  ccron remove daily-summary
 
-Run "cccron <command> --help" for detailed help on each command.`);
+Run "ccron <command> --help" for detailed help on each command.`);
 }
 
 if (!command || command === '--help' || command === '-h') {
@@ -85,7 +85,7 @@ const commands: Record<string, (args: string[]) => Promise<void>> = {
 const handler = commands[command];
 if (!handler) {
   console.error(`Unknown command: ${command}`);
-  console.error('Run "cccron --help" for usage.');
+  console.error('Run "ccron --help" for usage.');
   process.exit(1);
 }
 

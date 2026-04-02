@@ -1,5 +1,5 @@
 {
-  "name": "cccron",
+  "name": "@mrsekut/ccron",
   "version": "0.1.0",
   "description": "Schedule claude -p execution on macOS with launchd",
   "type": "module",
@@ -7,7 +7,7 @@
   "author": "mrsekut",
   "repository": {
     "type": "git",
-    "url": "https://github.com/mrsekut/cccron.git"
+    "url": "https://github.com/mrsekut/ccron.git"
   },
   "keywords": [
     "claude",
@@ -18,7 +18,7 @@
     "claude-code"
   ],
   "bin": {
-    "cccron": "src/cli.ts"
+    "ccron": "src/cli.ts"
   },
   "files": [
     "src",

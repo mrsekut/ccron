@@ -57,13 +57,13 @@ export async function addCommand(args: string[]): Promise<void> {
 
   // Save task config
   await writeTaskConfig(task);
-  console.log(`✓ Task config saved: ~/.config/cccron/tasks/${task.name}.json`);
+  console.log(`✓ Task config saved: ~/.config/ccron/tasks/${task.name}.json`);
 
   // Generate MCP config if needed
   if (task.mcp.length > 0) {
     const mcpContent = generateMcpConfigContent(task.mcp);
     await Bun.write(mcpConfigPath(task.name), mcpContent);
-    console.log(`✓ MCP config saved: ~/.config/cccron/mcp/${task.name}.json`);
+    console.log(`✓ MCP config saved: ~/.config/ccron/mcp/${task.name}.json`);
   }
 
   // Generate script
@@ -72,14 +72,14 @@ export async function addCommand(args: string[]): Promise<void> {
   await Bun.write(scriptFile, scriptContent);
   const { chmod } = await import('fs/promises');
   await chmod(scriptFile, 0o755);
-  console.log(`✓ Script generated: ~/.local/bin/cccron-${task.name}.sh`);
+  console.log(`✓ Script generated: ~/.local/bin/ccron-${task.name}.sh`);
 
   // Generate plist
   const plistContent = generatePlistContent(task, globalConfig, intervals);
   const plistFile = plistPath(task.name);
   await Bun.write(plistFile, plistContent);
   console.log(
-    `✓ Plist generated: ~/Library/LaunchAgents/com.cccron.${task.name}.plist`,
+    `✓ Plist generated: ~/Library/LaunchAgents/com.ccron.${task.name}.plist`,
   );
 
   // Register with launchd
@@ -87,7 +87,7 @@ export async function addCommand(args: string[]): Promise<void> {
   console.log(`✓ Registered with launchd`);
 
   console.log(
-    `\n${task.name} scheduled (${task.schedule}). Run "cccron test ${task.name}" to verify setup.`,
+    `\n${task.name} scheduled (${task.schedule}). Run "ccron test ${task.name}" to verify setup.`,
   );
 }
 
@@ -139,7 +139,7 @@ async function validateOptions(opts: AddOptions): Promise<void> {
       const existing = await readTaskConfig(opts.name);
       if (existing) {
         errors.push(
-          `Task "${opts.name}" already exists. Use "cccron edit ${opts.name}" to modify.`,
+          `Task "${opts.name}" already exists. Use "ccron edit ${opts.name}" to modify.`,
         );
       }
     }
@@ -195,7 +195,7 @@ async function ensureGlobalConfig(): Promise<GlobalConfig> {
       console.log(`✓ claude CLI detected: ${detected}`);
     } else {
       console.error(
-        'Warning: Could not detect claude CLI path. Set it manually with cccron config --claude-path',
+        'Warning: Could not detect claude CLI path. Set it manually with ccron config --claude-path',
       );
     }
   }
@@ -219,9 +219,9 @@ async function detectClaudePath(): Promise<string | null> {
 }
 
 function printAddHelp() {
-  console.log(`cccron add - Register a new scheduled task
+  console.log(`ccron add - Register a new scheduled task
 
-Usage: cccron add [options]
+Usage: ccron add [options]
 
 Required:
   --name <name>           Task name (lowercase letters, numbers, hyphens)
@@ -243,9 +243,9 @@ Schedule format (cron):
   day-of-month and month: must be "*" (launchd limitation)
 
 Examples:
-  cccron add --name daily-summary --schedule "15 17 * * 1-5" --prompt-file ./prompts/daily.txt
-  cccron add --name weekly-review --schedule "0 22 * * 5" --prompt "週次レビューを作成して" --mcp slack
-  cccron add --name hourly-check --schedule "0 9 * * *" --prompt "ステータスチェック" --allowed-tools "Bash,Read"
+  ccron add --name daily-summary --schedule "15 17 * * 1-5" --prompt-file ./prompts/daily.txt
+  ccron add --name weekly-review --schedule "0 22 * * 5" --prompt "週次レビューを作成して" --mcp slack
+  ccron add --name hourly-check --schedule "0 9 * * *" --prompt "ステータスチェック" --allowed-tools "Bash,Read"
 
 Note: Step values (*/5) and ranges in minute/hour are not supported by launchd.`);
 }

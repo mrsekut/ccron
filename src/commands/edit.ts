@@ -39,7 +39,7 @@ export async function editCommand(args: string[]): Promise<void> {
 
   const name = positionals[0] as string | undefined;
   if (!name) {
-    console.error('Usage: ccron edit <name> [options]');
+    console.error('Usage: cccron edit <name> [options]');
     process.exit(1);
   }
 
@@ -139,9 +139,9 @@ export async function editCommand(args: string[]): Promise<void> {
 }
 
 function printEditHelp() {
-  console.log(`ccron edit - Edit a task's configuration
+  console.log(`cccron edit - Edit a task's configuration
 
-Usage: ccron edit <name> [options]
+Usage: cccron edit <name> [options]
 
 Options:
   --schedule <cron>       Update cron expression
@@ -152,7 +152,7 @@ Options:
   --max-turns <n>         Update max turns
 
 Examples:
-  ccron edit daily-summary --schedule "0 18 * * 1-5"
-  ccron edit daily-summary --prompt-file ./prompts/v2.txt
-  ccron edit daily-summary --mcp slack,linear`);
+  cccron edit daily-summary --schedule "0 18 * * 1-5"
+  cccron edit daily-summary --prompt-file ./prompts/v2.txt
+  cccron edit daily-summary --mcp slack,linear`);
 }

@@ -10,9 +10,9 @@ import { listOne } from '../launchd';
 
 export async function showCommand(args: string[]): Promise<void> {
   if (args.includes('--help') || args.includes('-h')) {
-    console.log(`ccron show - Show detailed information about a task
+    console.log(`cccron show - Show detailed information about a task
 
-Usage: ccron show <name>
+Usage: cccron show <name>
 
 Displays task configuration, launchd status, and file locations.`);
     return;
@@ -20,7 +20,7 @@ Displays task configuration, launchd status, and file locations.`);
 
   const name = args[0];
   if (!name) {
-    console.error('Task name is required. Usage: ccron show <name>');
+    console.error('Task name is required. Usage: cccron show <name>');
     process.exit(1);
   }
 

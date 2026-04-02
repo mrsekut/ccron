@@ -3,20 +3,20 @@ import { spawn } from 'child_process';
 
 export async function logCommand(args: string[]): Promise<void> {
   if (args.includes('--help') || args.includes('-h')) {
-    console.log(`ccron log - Show task execution logs
+    console.log(`cccron log - Show task execution logs
 
-Usage: ccron log <name> [--follow]
+Usage: cccron log <name> [--follow]
 
 Options:
   --follow, -f   Tail the log in real-time (Ctrl+C to stop)
 
 Without --follow, shows the last 50 lines of the log.
 
-Log location: ~/.local/share/ccron/logs/<name>.log
+Log location: ~/.local/share/cccron/logs/<name>.log
 
 Examples:
-  ccron log daily-summary
-  ccron log daily-summary --follow`);
+  cccron log daily-summary
+  cccron log daily-summary --follow`);
     return;
   }
 
@@ -24,7 +24,7 @@ Examples:
   const follow = args.includes('--follow') || args.includes('-f');
 
   if (!name) {
-    console.error('Usage: ccron log <name> [--follow]');
+    console.error('Usage: cccron log <name> [--follow]');
     process.exit(1);
   }
 

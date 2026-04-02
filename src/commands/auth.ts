@@ -3,9 +3,9 @@ import { spawn } from 'child_process';
 
 export async function authCommand(args: string[]): Promise<void> {
   if (args.includes('--help') || args.includes('-h')) {
-    console.log(`ccron auth - Re-authenticate MCP servers for a task
+    console.log(`cccron auth - Re-authenticate MCP servers for a task
 
-Usage: ccron auth <name>
+Usage: cccron auth <name>
 
 Opens an interactive claude session with the task's MCP config, allowing
 you to complete OAuth flows for MCP servers (Slack, Linear, etc.).
@@ -14,13 +14,13 @@ The session runs from /tmp to avoid git repo issues.
 Exit claude after authentication is complete.
 
 Example:
-  ccron auth daily-summary`);
+  cccron auth daily-summary`);
     return;
   }
 
   const name = args[0];
   if (!name) {
-    console.error('Usage: ccron auth <name>');
+    console.error('Usage: cccron auth <name>');
     process.exit(1);
   }
 
@@ -39,7 +39,7 @@ Example:
   if (!(await Bun.file(mcpConfig).exists())) {
     console.error(`MCP config not found: ${mcpConfig}`);
     console.error(
-      `Re-register with: ccron add --name ${name} --mcp ${task.mcp.join(',')}`,
+      `Re-register with: cccron add --name ${name} --mcp ${task.mcp.join(',')}`,
     );
     process.exit(1);
   }

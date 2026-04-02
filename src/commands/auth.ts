@@ -38,7 +38,9 @@ Example:
   const mcpConfig = mcpConfigPath(name);
   if (!(await Bun.file(mcpConfig).exists())) {
     console.error(`MCP config not found: ${mcpConfig}`);
-    console.error(`Re-register with: ccron add --name ${name} --mcp ${task.mcp.join(",")}`);
+    console.error(
+      `Re-register with: ccron add --name ${name} --mcp ${task.mcp.join(",")}`,
+    );
     process.exit(1);
   }
 

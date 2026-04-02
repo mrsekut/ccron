@@ -15,8 +15,7 @@ export async function bootstrap(plistPath: string): Promise<void> {
 export async function bootout(name: string): Promise<void> {
   const uid = process.getuid?.() ?? 501;
   const label = plistLabel(name);
-  const result =
-    await Bun.$`launchctl bootout gui/${uid}/${label}`.quiet();
+  const result = await Bun.$`launchctl bootout gui/${uid}/${label}`.quiet();
   if (result.exitCode !== 0) {
     const stderr = result.stderr.toString().trim();
     // Not found is not an error during removal
@@ -28,8 +27,7 @@ export async function bootout(name: string): Promise<void> {
 export async function kickstart(name: string): Promise<void> {
   const uid = process.getuid?.() ?? 501;
   const label = plistLabel(name);
-  const result =
-    await Bun.$`launchctl kickstart gui/${uid}/${label}`.quiet();
+  const result = await Bun.$`launchctl kickstart gui/${uid}/${label}`.quiet();
   if (result.exitCode !== 0) {
     throw new Error(
       `launchctl kickstart failed: ${result.stderr.toString().trim()}`,

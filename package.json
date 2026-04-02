@@ -8,10 +8,11 @@
   },
   "files": [
     "src",
-    "skills"
+    "claude-plugin"
   ],
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "prettier": "^3.8.1"
   },
   "peerDependencies": {
     "typescript": "^5"

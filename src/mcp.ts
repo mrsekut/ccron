@@ -34,9 +34,9 @@ export function validateMcpPresets(names: string[]): string | null {
  * Build an MCP config JSON object from preset names.
  * Output format matches claude CLI's --mcp-config expectation.
  */
-export function buildMcpConfig(
-  presets: string[],
-): { mcpServers: Record<string, McpServerEntry> } {
+export function buildMcpConfig(presets: string[]): {
+  mcpServers: Record<string, McpServerEntry>;
+} {
   const servers: Record<string, McpServerEntry> = {};
   for (const name of presets) {
     const preset = MCP_PRESETS[name];

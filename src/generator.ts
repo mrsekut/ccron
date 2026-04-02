@@ -139,9 +139,7 @@ function calendarIntervalDict(interval: CalendarInterval): string {
   entries.push(`<key>Hour</key>\n<integer>${interval.Hour}</integer>`);
   entries.push(`<key>Minute</key>\n<integer>${interval.Minute}</integer>`);
   if (interval.Weekday !== undefined) {
-    entries.push(
-      `<key>Weekday</key>\n<integer>${interval.Weekday}</integer>`,
-    );
+    entries.push(`<key>Weekday</key>\n<integer>${interval.Weekday}</integer>`);
   }
   return `<dict>\n${entries.map((e) => indent(e, 4)).join("\n")}\n</dict>`;
 }

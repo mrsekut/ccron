@@ -33,7 +33,7 @@ describe("generateScriptContent", () => {
     const script = generateScriptContent(makeTask(), baseGlobal);
     expect(script).toContain("#!/usr/bin/env bash");
     expect(script).toContain("set -uo pipefail");
-    expect(script).toContain('export HOME=');
+    expect(script).toContain("export HOME=");
     expect(script).toContain("/Users/test/.nix-profile/bin");
     expect(script).toContain("ulimit -n 2147483646");
     expect(script).toContain("cd /tmp");

@@ -171,7 +171,10 @@ async function validateOptions(opts: AddOptions): Promise<void> {
   }
 
   // Max turns
-  if (opts.maxTurns !== null && (!Number.isInteger(opts.maxTurns) || opts.maxTurns < 1)) {
+  if (
+    opts.maxTurns !== null &&
+    (!Number.isInteger(opts.maxTurns) || opts.maxTurns < 1)
+  ) {
     errors.push("--max-turns must be a positive integer");
   }
 

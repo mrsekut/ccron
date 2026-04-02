@@ -31,9 +31,15 @@ Example:
   const log = logPath(name);
 
   // Ensure log file exists for tail
-  await Bun.write(log, await Bun.file(log).text().catch(() => ""), {
-    createPath: true,
-  });
+  await Bun.write(
+    log,
+    await Bun.file(log)
+      .text()
+      .catch(() => ""),
+    {
+      createPath: true,
+    },
+  );
 
   console.log(`Kicking start ${name}...`);
   await kickstart(name);

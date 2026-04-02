@@ -110,7 +110,10 @@ export async function editCommand(args: string[]): Promise<void> {
 
   // Regenerate MCP config
   if (task.mcp.length > 0) {
-    await Bun.write(mcpConfigPath(task.name), generateMcpConfigContent(task.mcp));
+    await Bun.write(
+      mcpConfigPath(task.name),
+      generateMcpConfigContent(task.mcp),
+    );
     console.log(`✓ MCP config regenerated`);
   }
 

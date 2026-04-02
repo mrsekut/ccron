@@ -12,7 +12,7 @@ type CheckResult = {
   label: string;
   ok: boolean;
   detail: string;
-  fix?: string;
+  fix?: string | undefined;
 };
 
 export async function testCommand(args: string[]): Promise<void> {
@@ -177,11 +177,7 @@ async function checkScriptExists(name: string): Promise<CheckResult> {
 function checkScriptTccSafe(name: string): CheckResult {
   const path = scriptPath(name);
   const home = homedir();
-  const tccDirs = [
-    `${home}/Desktop`,
-    `${home}/Documents`,
-    `${home}/Downloads`,
-  ];
+  const tccDirs = [`${home}/Desktop`, `${home}/Documents`, `${home}/Downloads`];
   const inTcc = tccDirs.some((dir) => path.startsWith(dir));
   return {
     label: "TCC protection",

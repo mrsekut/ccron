@@ -135,7 +135,7 @@ const TASK_NAME_RE = /^[a-z0-9][a-z0-9-]*$/;
 export function validateTaskName(name: string): string | null {
   if (!name) return "Task name is required";
   if (!TASK_NAME_RE.test(name))
-    return 'Task name must contain only lowercase letters, numbers, and hyphens, and start with a letter or number';
+    return "Task name must contain only lowercase letters, numbers, and hyphens, and start with a letter or number";
   if (name.length > 64) return "Task name must be 64 characters or less";
   return null;
 }

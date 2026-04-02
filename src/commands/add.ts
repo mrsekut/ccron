@@ -92,58 +92,38 @@ export async function addCommand(args: string[]): Promise<void> {
 }
 
 function parseAddArgs(args: string[]): AddOptions {
-  let name = "";
-  let schedule = "";
-  let prompt: string | null = null;
-  let promptFile: string | null = null;
-  let mcp: string[] = [];
-  let allowedTools: string[] = [];
-  let maxTurns: number | null = null;
+  const { parseArgs } = require("util");
+  const { values } = parseArgs({
+    args,
+    options: {
+      name: { type: "string" },
+      schedule: { type: "string" },
+      prompt: { type: "string" },
+      "prompt-file": { type: "string" },
+      mcp: { type: "string" },
+      "allowed-tools": { type: "string" },
+      "max-turns": { type: "string" },
+      help: { type: "boolean", short: "h" },
+    },
+    strict: true,
+  });
 
-  for (let i = 0; i < args.length; i++) {
-    const arg = args[i]!;
-    const next = args[i + 1];
-
-    switch (arg) {
-      case "--name":
-        name = next ?? "";
-        i++;
-        break;
-      case "--schedule":
-        schedule = next ?? "";
-        i++;
-        break;
-      case "--prompt":
-        prompt = next ?? "";
-        i++;
-        break;
-      case "--prompt-file":
-        promptFile = next ?? "";
-        i++;
-        break;
-      case "--mcp":
-        mcp = (next ?? "").split(",").filter(Boolean);
-        i++;
-        break;
-      case "--allowed-tools":
-        allowedTools = (next ?? "").split(",").filter(Boolean);
-        i++;
-        break;
-      case "--max-turns":
-        maxTurns = Number(next);
-        i++;
-        break;
-      case "--help":
-      case "-h":
-        printAddHelp();
-        process.exit(0);
-      default:
-        console.error(`Unknown option: ${arg}`);
-        process.exit(1);
-    }
+  if (values.help) {
+    printAddHelp();
+    process.exit(0);
   }
 
-  return { name, schedule, prompt, promptFile, mcp, allowedTools, maxTurns };
+  return {
+    name: values.name ?? "",
+    schedule: values.schedule ?? "",
+    prompt: values.prompt ?? null,
+    promptFile: values["prompt-file"] ?? null,
+    mcp: values.mcp ? values.mcp.split(",").filter(Boolean) : [],
+    allowedTools: values["allowed-tools"]
+      ? values["allowed-tools"].split(",").filter(Boolean)
+      : [],
+    maxTurns: values["max-turns"] ? Number(values["max-turns"]) : null,
+  };
 }
 
 async function validateOptions(opts: AddOptions): Promise<void> {

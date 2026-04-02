@@ -16,8 +16,28 @@ import {
 import { bootout, bootstrap } from "../launchd";
 
 export async function editCommand(args: string[]): Promise<void> {
-  const name = args.find((a) => !a.startsWith("-"));
+  const { parseArgs } = require("util");
+  const { values, positionals } = parseArgs({
+    args,
+    options: {
+      schedule: { type: "string" },
+      prompt: { type: "string" },
+      "prompt-file": { type: "string" },
+      mcp: { type: "string" },
+      "allowed-tools": { type: "string" },
+      "max-turns": { type: "string" },
+      help: { type: "boolean", short: "h" },
+    },
+    allowPositionals: true,
+    strict: true,
+  });
 
+  if (values.help) {
+    printEditHelp();
+    process.exit(0);
+  }
+
+  const name = positionals[0] as string | undefined;
   if (!name) {
     console.error("Usage: ccron edit <name> [options]");
     process.exit(1);
@@ -31,65 +51,47 @@ export async function editCommand(args: string[]): Promise<void> {
 
   let changed = false;
 
-  for (let i = 0; i < args.length; i++) {
-    const arg = args[i]!;
-    const next = args[i + 1];
+  if (values.schedule !== undefined) {
+    task.schedule = values.schedule;
+    parseSchedule(task.schedule);
+    changed = true;
+  }
 
-    switch (arg) {
-      case "--schedule":
-        task.schedule = next ?? "";
-        parseSchedule(task.schedule); // validate
-        i++;
-        changed = true;
-        break;
-      case "--prompt":
-        task.prompt = next ?? "";
-        task.promptFile = null;
-        i++;
-        changed = true;
-        break;
-      case "--prompt-file":
-        task.promptFile = next ?? "";
-        task.prompt = null;
-        if (!(await Bun.file(task.promptFile).exists())) {
-          console.error(`Prompt file not found: ${task.promptFile}`);
-          process.exit(1);
-        }
-        i++;
-        changed = true;
-        break;
-      case "--mcp": {
-        const mcpNames = (next ?? "").split(",").filter(Boolean);
-        const mcpError = validateMcpPresets(mcpNames);
-        if (mcpError) {
-          console.error(`Error: ${mcpError}`);
-          process.exit(1);
-        }
-        task.mcp = mcpNames;
-        i++;
-        changed = true;
-        break;
-      }
-      case "--allowed-tools":
-        task.allowedTools = (next ?? "").split(",").filter(Boolean);
-        i++;
-        changed = true;
-        break;
-      case "--max-turns":
-        task.maxTurns = next ? Number(next) : null;
-        i++;
-        changed = true;
-        break;
-      case "--help":
-      case "-h":
-        printEditHelp();
-        process.exit(0);
-      default:
-        if (arg !== name) {
-          console.error(`Unknown option: ${arg}`);
-          process.exit(1);
-        }
+  if (values.prompt !== undefined) {
+    task.prompt = values.prompt;
+    task.promptFile = null;
+    changed = true;
+  }
+
+  if (values["prompt-file"] !== undefined) {
+    task.promptFile = values["prompt-file"];
+    task.prompt = null;
+    if (!(await Bun.file(task.promptFile!).exists())) {
+      console.error(`Prompt file not found: ${task.promptFile}`);
+      process.exit(1);
     }
+    changed = true;
+  }
+
+  if (values.mcp !== undefined) {
+    const mcpNames = values.mcp.split(",").filter(Boolean);
+    const mcpError = validateMcpPresets(mcpNames);
+    if (mcpError) {
+      console.error(`Error: ${mcpError}`);
+      process.exit(1);
+    }
+    task.mcp = mcpNames;
+    changed = true;
+  }
+
+  if (values["allowed-tools"] !== undefined) {
+    task.allowedTools = values["allowed-tools"].split(",").filter(Boolean);
+    changed = true;
+  }
+
+  if (values["max-turns"] !== undefined) {
+    task.maxTurns = Number(values["max-turns"]);
+    changed = true;
   }
 
   if (!changed) {

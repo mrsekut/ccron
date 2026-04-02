@@ -37,9 +37,17 @@ if (!command || command === "--help" || command === "-h") {
 }
 
 import { addCommand } from "./commands/add";
+import { listCommand } from "./commands/list";
+import { runCommand } from "./commands/run";
+import { logCommand } from "./commands/log";
+import { testCommand } from "./commands/test";
 
 const commands: Record<string, (args: string[]) => Promise<void>> = {
   add: addCommand,
+  list: listCommand,
+  run: runCommand,
+  log: logCommand,
+  test: testCommand,
 };
 
 const handler = commands[command];

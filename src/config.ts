@@ -1,5 +1,5 @@
-import { homedir } from "os";
-import { join } from "path";
+import { homedir } from 'os';
+import { join } from 'path';
 
 // --- Types ---
 
@@ -26,13 +26,13 @@ export type GlobalConfig = {
 const home = homedir();
 
 export const PATHS = {
-  configDir: join(home, ".config", "ccron"),
-  tasksDir: join(home, ".config", "ccron", "tasks"),
-  mcpDir: join(home, ".config", "ccron", "mcp"),
-  globalConfig: join(home, ".config", "ccron", "config.json"),
-  binDir: join(home, ".local", "bin"),
-  logsDir: join(home, ".local", "share", "ccron", "logs"),
-  launchAgentsDir: join(home, "Library", "LaunchAgents"),
+  configDir: join(home, '.config', 'ccron'),
+  tasksDir: join(home, '.config', 'ccron', 'tasks'),
+  mcpDir: join(home, '.config', 'ccron', 'mcp'),
+  globalConfig: join(home, '.config', 'ccron', 'config.json'),
+  binDir: join(home, '.local', 'bin'),
+  logsDir: join(home, '.local', 'share', 'ccron', 'logs'),
+  launchAgentsDir: join(home, 'Library', 'LaunchAgents'),
 } as const;
 
 export function taskConfigPath(name: string): string {
@@ -62,7 +62,7 @@ export function plistLabel(name: string): string {
 // --- I/O ---
 
 export async function ensureDirectories(): Promise<void> {
-  const { mkdir } = await import("fs/promises");
+  const { mkdir } = await import('fs/promises');
   await Promise.all([
     mkdir(PATHS.tasksDir, { recursive: true }),
     mkdir(PATHS.mcpDir, { recursive: true }),
@@ -83,7 +83,7 @@ export async function writeTaskConfig(config: TaskConfig): Promise<void> {
 }
 
 export async function listTaskConfigs(): Promise<TaskConfig[]> {
-  const { readdir } = await import("fs/promises");
+  const { readdir } = await import('fs/promises');
   let files: string[];
   try {
     files = await readdir(PATHS.tasksDir);
@@ -92,7 +92,7 @@ export async function listTaskConfigs(): Promise<TaskConfig[]> {
   }
   const tasks: TaskConfig[] = [];
   for (const file of files) {
-    if (!file.endsWith(".json")) continue;
+    if (!file.endsWith('.json')) continue;
     const content = await Bun.file(join(PATHS.tasksDir, file)).json();
     tasks.push(content as TaskConfig);
   }
@@ -100,7 +100,7 @@ export async function listTaskConfigs(): Promise<TaskConfig[]> {
 }
 
 export async function deleteTaskConfig(name: string): Promise<void> {
-  const { unlink } = await import("fs/promises");
+  const { unlink } = await import('fs/promises');
   try {
     await unlink(taskConfigPath(name));
   } catch {
@@ -122,7 +122,7 @@ export async function writeGlobalConfig(config: GlobalConfig): Promise<void> {
 
 function defaultGlobalConfig(): GlobalConfig {
   return {
-    claudePath: "",
+    claudePath: '',
     extraPaths: [],
     ulimit: 2147483646,
   };
@@ -133,9 +133,9 @@ function defaultGlobalConfig(): GlobalConfig {
 const TASK_NAME_RE = /^[a-z0-9][a-z0-9-]*$/;
 
 export function validateTaskName(name: string): string | null {
-  if (!name) return "Task name is required";
+  if (!name) return 'Task name is required';
   if (!TASK_NAME_RE.test(name))
-    return "Task name must contain only lowercase letters, numbers, and hyphens, and start with a letter or number";
-  if (name.length > 64) return "Task name must be 64 characters or less";
+    return 'Task name must contain only lowercase letters, numbers, and hyphens, and start with a letter or number';
+  if (name.length > 64) return 'Task name must be 64 characters or less';
   return null;
 }

@@ -10,15 +10,15 @@ import {
   mcpConfigPath,
   scriptPath,
   plistPath,
-} from "../config";
-import { parseSchedule } from "../schedule";
-import { validateMcpPresets } from "../mcp";
+} from '../config';
+import { parseSchedule } from '../schedule';
+import { validateMcpPresets } from '../mcp';
 import {
   generateScriptContent,
   generatePlistContent,
   generateMcpConfigContent,
-} from "../generator";
-import { bootstrap } from "../launchd";
+} from '../generator';
+import { bootstrap } from '../launchd';
 
 type AddOptions = {
   name: string;
@@ -70,7 +70,7 @@ export async function addCommand(args: string[]): Promise<void> {
   const scriptContent = generateScriptContent(task, globalConfig);
   const scriptFile = scriptPath(task.name);
   await Bun.write(scriptFile, scriptContent);
-  const { chmod } = await import("fs/promises");
+  const { chmod } = await import('fs/promises');
   await chmod(scriptFile, 0o755);
   console.log(`✓ Script generated: ~/.local/bin/ccron-${task.name}.sh`);
 
@@ -92,18 +92,18 @@ export async function addCommand(args: string[]): Promise<void> {
 }
 
 function parseAddArgs(args: string[]): AddOptions {
-  const { parseArgs } = require("util");
+  const { parseArgs } = require('util');
   const { values } = parseArgs({
     args,
     options: {
-      name: { type: "string" },
-      schedule: { type: "string" },
-      prompt: { type: "string" },
-      "prompt-file": { type: "string" },
-      mcp: { type: "string" },
-      "allowed-tools": { type: "string" },
-      "max-turns": { type: "string" },
-      help: { type: "boolean", short: "h" },
+      name: { type: 'string' },
+      schedule: { type: 'string' },
+      prompt: { type: 'string' },
+      'prompt-file': { type: 'string' },
+      mcp: { type: 'string' },
+      'allowed-tools': { type: 'string' },
+      'max-turns': { type: 'string' },
+      help: { type: 'boolean', short: 'h' },
     },
     strict: true,
   });
@@ -114,15 +114,15 @@ function parseAddArgs(args: string[]): AddOptions {
   }
 
   return {
-    name: values.name ?? "",
-    schedule: values.schedule ?? "",
+    name: values.name ?? '',
+    schedule: values.schedule ?? '',
     prompt: values.prompt ?? null,
-    promptFile: values["prompt-file"] ?? null,
-    mcp: values.mcp ? values.mcp.split(",").filter(Boolean) : [],
-    allowedTools: values["allowed-tools"]
-      ? values["allowed-tools"].split(",").filter(Boolean)
+    promptFile: values['prompt-file'] ?? null,
+    mcp: values.mcp ? values.mcp.split(',').filter(Boolean) : [],
+    allowedTools: values['allowed-tools']
+      ? values['allowed-tools'].split(',').filter(Boolean)
       : [],
-    maxTurns: values["max-turns"] ? Number(values["max-turns"]) : null,
+    maxTurns: values['max-turns'] ? Number(values['max-turns']) : null,
   };
 }
 
@@ -131,7 +131,7 @@ async function validateOptions(opts: AddOptions): Promise<void> {
 
   // Name
   if (!opts.name) {
-    errors.push("--name is required");
+    errors.push('--name is required');
   } else {
     const nameError = validateTaskName(opts.name);
     if (nameError) errors.push(nameError);
@@ -147,15 +147,15 @@ async function validateOptions(opts: AddOptions): Promise<void> {
 
   // Schedule
   if (!opts.schedule) {
-    errors.push("--schedule is required");
+    errors.push('--schedule is required');
   }
 
   // Prompt
   if (!opts.prompt && !opts.promptFile) {
-    errors.push("Either --prompt or --prompt-file is required");
+    errors.push('Either --prompt or --prompt-file is required');
   }
   if (opts.prompt && opts.promptFile) {
-    errors.push("Cannot specify both --prompt and --prompt-file");
+    errors.push('Cannot specify both --prompt and --prompt-file');
   }
   if (opts.promptFile) {
     const file = Bun.file(opts.promptFile);
@@ -175,7 +175,7 @@ async function validateOptions(opts: AddOptions): Promise<void> {
     opts.maxTurns !== null &&
     (!Number.isInteger(opts.maxTurns) || opts.maxTurns < 1)
   ) {
-    errors.push("--max-turns must be a positive integer");
+    errors.push('--max-turns must be a positive integer');
   }
 
   if (errors.length > 0) {
@@ -195,7 +195,7 @@ async function ensureGlobalConfig(): Promise<GlobalConfig> {
       console.log(`✓ claude CLI detected: ${detected}`);
     } else {
       console.error(
-        "Warning: Could not detect claude CLI path. Set it manually with ccron config --claude-path",
+        'Warning: Could not detect claude CLI path. Set it manually with ccron config --claude-path',
       );
     }
   }
@@ -209,7 +209,7 @@ async function detectClaudePath(): Promise<string | null> {
     if (result.exitCode === 0) {
       const fullPath = result.stdout.toString().trim();
       // Return the directory containing claude
-      const { dirname } = await import("path");
+      const { dirname } = await import('path');
       return dirname(fullPath);
     }
   } catch {

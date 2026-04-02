@@ -1,8 +1,8 @@
-import { readTaskConfig, logPath } from "../config";
-import { spawn } from "child_process";
+import { readTaskConfig, logPath } from '../config';
+import { spawn } from 'child_process';
 
 export async function logCommand(args: string[]): Promise<void> {
-  if (args.includes("--help") || args.includes("-h")) {
+  if (args.includes('--help') || args.includes('-h')) {
     console.log(`ccron log - Show task execution logs
 
 Usage: ccron log <name> [--follow]
@@ -20,11 +20,11 @@ Examples:
     return;
   }
 
-  const name = args.find((a) => !a.startsWith("-"));
-  const follow = args.includes("--follow") || args.includes("-f");
+  const name = args.find(a => !a.startsWith('-'));
+  const follow = args.includes('--follow') || args.includes('-f');
 
   if (!name) {
-    console.error("Usage: ccron log <name> [--follow]");
+    console.error('Usage: ccron log <name> [--follow]');
     process.exit(1);
   }
 
@@ -43,15 +43,15 @@ Examples:
   }
 
   if (follow) {
-    const tail = spawn("tail", ["-f", log], {
-      stdio: ["ignore", "inherit", "inherit"],
+    const tail = spawn('tail', ['-f', log], {
+      stdio: ['ignore', 'inherit', 'inherit'],
     });
-    process.on("SIGINT", () => {
+    process.on('SIGINT', () => {
       tail.kill();
       process.exit(0);
     });
-    await new Promise<void>((resolve) => {
-      tail.on("close", () => resolve());
+    await new Promise<void>(resolve => {
+      tail.on('close', () => resolve());
     });
   } else {
     // Show last 50 lines

@@ -6,11 +6,11 @@ import {
   mcpConfigPath,
   logPath,
   listTaskConfigs,
-} from "../config";
-import { bootout } from "../launchd";
+} from '../config';
+import { bootout } from '../launchd';
 
 export async function removeCommand(args: string[]): Promise<void> {
-  if (args.includes("--help") || args.includes("-h")) {
+  if (args.includes('--help') || args.includes('-h')) {
     console.log(`ccron remove - Remove a registered task
 
 Usage: ccron remove <name> [--purge]
@@ -29,11 +29,11 @@ Examples:
     return;
   }
 
-  const purge = args.includes("--purge");
-  const name = args.find((a) => !a.startsWith("-"));
+  const purge = args.includes('--purge');
+  const name = args.find(a => !a.startsWith('-'));
 
   if (!name) {
-    console.error("Usage: ccron remove <name> [--purge]");
+    console.error('Usage: ccron remove <name> [--purge]');
     process.exit(1);
   }
 
@@ -59,7 +59,7 @@ Examples:
   if (task.mcp.length > 0) {
     const otherTasks = await listTaskConfigs();
     const otherUsing = otherTasks.some(
-      (t) => t.name !== name && t.mcp.some((m) => task.mcp.includes(m)),
+      t => t.name !== name && t.mcp.some(m => task.mcp.includes(m)),
     );
     if (!otherUsing) {
       await tryUnlink(mcpConfigPath(name));
@@ -85,7 +85,7 @@ Examples:
 }
 
 async function tryUnlink(path: string): Promise<void> {
-  const { unlink } = await import("fs/promises");
+  const { unlink } = await import('fs/promises');
   try {
     await unlink(path);
   } catch {

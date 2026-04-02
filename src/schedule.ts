@@ -23,7 +23,7 @@ export type CalendarInterval = {
 export function parseSchedule(input: string): CalendarInterval[] {
   const trimmed = input.trim();
   if (!trimmed) {
-    throw new ScheduleParseError("Schedule string is empty");
+    throw new ScheduleParseError('Schedule string is empty');
   }
 
   const fields = trimmed.split(/\s+/);
@@ -39,29 +39,29 @@ export function parseSchedule(input: string): CalendarInterval[] {
   const month = fields[3]!;
   const dayOfWeek = fields[4]!;
 
-  if (dayOfMonth !== "*" || month !== "*") {
+  if (dayOfMonth !== '*' || month !== '*') {
     throw new ScheduleParseError(
       `Day-of-month and month fields must be "*". ` +
         `launchd StartCalendarInterval only supports hour/minute/weekday scheduling.`,
     );
   }
 
-  if (minuteField.includes("/") || hourField.includes("/")) {
+  if (minuteField.includes('/') || hourField.includes('/')) {
     throw new ScheduleParseError(
       `Step values (e.g. "*/5") are not supported. ` +
         `launchd StartCalendarInterval cannot express interval-based schedules.`,
     );
   }
 
-  if (minuteField.includes("-") || hourField.includes("-")) {
+  if (minuteField.includes('-') || hourField.includes('-')) {
     throw new ScheduleParseError(
       `Range values (e.g. "9-17") in minute/hour are not supported. ` +
         `launchd StartCalendarInterval can only express fixed times.`,
     );
   }
 
-  const minute = parseIntStrict(minuteField, "minute", 0, 59);
-  const hour = parseIntStrict(hourField, "hour", 0, 23);
+  const minute = parseIntStrict(minuteField, 'minute', 0, 59);
+  const hour = parseIntStrict(hourField, 'hour', 0, 23);
 
   const weekdays = parseDayOfWeek(dayOfWeek);
 
@@ -69,20 +69,20 @@ export function parseSchedule(input: string): CalendarInterval[] {
     return [{ Hour: hour, Minute: minute }];
   }
 
-  return weekdays.map((day) => ({ Hour: hour, Minute: minute, Weekday: day }));
+  return weekdays.map(day => ({ Hour: hour, Minute: minute, Weekday: day }));
 }
 
 function parseDayOfWeek(field: string): number[] | null {
-  if (field === "*") return null;
+  if (field === '*') return null;
 
-  const parts = field.split(",");
+  const parts = field.split(',');
   const days: number[] = [];
 
   for (const part of parts) {
-    if (part.includes("-")) {
-      const segments = part.split("-");
-      const start = parseIntStrict(segments[0]!, "day-of-week", 0, 6);
-      const end = parseIntStrict(segments[1]!, "day-of-week", 0, 6);
+    if (part.includes('-')) {
+      const segments = part.split('-');
+      const start = parseIntStrict(segments[0]!, 'day-of-week', 0, 6);
+      const end = parseIntStrict(segments[1]!, 'day-of-week', 0, 6);
       if (start <= end) {
         for (let i = start; i <= end; i++) days.push(i);
       } else {
@@ -91,7 +91,7 @@ function parseDayOfWeek(field: string): number[] | null {
         for (let i = 0; i <= end; i++) days.push(i);
       }
     } else {
-      days.push(parseIntStrict(part, "day-of-week", 0, 6));
+      days.push(parseIntStrict(part, 'day-of-week', 0, 6));
     }
   }
 
@@ -116,6 +116,6 @@ function parseIntStrict(
 export class ScheduleParseError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = "ScheduleParseError";
+    this.name = 'ScheduleParseError';
   }
 }

@@ -4,7 +4,7 @@ const args = process.argv.slice(2);
 const command = args[0];
 
 function printHelp() {
-	console.log(`ccron - Schedule claude -p execution on macOS with launchd
+  console.log(`ccron - Schedule claude -p execution on macOS with launchd
 
 Schedule claude -p execution on macOS via launchd.
 Handles all the tricky launchd setup automatically.
@@ -55,38 +55,38 @@ Examples:
 Run "ccron <command> --help" for detailed help on each command.`);
 }
 
-if (!command || command === "--help" || command === "-h") {
-	printHelp();
-	process.exit(0);
+if (!command || command === '--help' || command === '-h') {
+  printHelp();
+  process.exit(0);
 }
 
-import { addCommand } from "./commands/add";
-import { listCommand } from "./commands/list";
-import { runCommand } from "./commands/run";
-import { logCommand } from "./commands/log";
-import { testCommand } from "./commands/test";
-import { removeCommand } from "./commands/remove";
-import { editCommand } from "./commands/edit";
-import { authCommand } from "./commands/auth";
-import { showCommand } from "./commands/show";
+import { addCommand } from './commands/add';
+import { listCommand } from './commands/list';
+import { runCommand } from './commands/run';
+import { logCommand } from './commands/log';
+import { testCommand } from './commands/test';
+import { removeCommand } from './commands/remove';
+import { editCommand } from './commands/edit';
+import { authCommand } from './commands/auth';
+import { showCommand } from './commands/show';
 
 const commands: Record<string, (args: string[]) => Promise<void>> = {
-	add: addCommand,
-	list: listCommand,
-	show: showCommand,
-	run: runCommand,
-	log: logCommand,
-	test: testCommand,
-	remove: removeCommand,
-	edit: editCommand,
-	auth: authCommand,
+  add: addCommand,
+  list: listCommand,
+  show: showCommand,
+  run: runCommand,
+  log: logCommand,
+  test: testCommand,
+  remove: removeCommand,
+  edit: editCommand,
+  auth: authCommand,
 };
 
 const handler = commands[command];
 if (!handler) {
-	console.error(`Unknown command: ${command}`);
-	console.error('Run "ccron --help" for usage.');
-	process.exit(1);
+  console.error(`Unknown command: ${command}`);
+  console.error('Run "ccron --help" for usage.');
+  process.exit(1);
 }
 
 await handler(args.slice(1));

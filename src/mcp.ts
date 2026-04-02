@@ -5,12 +5,12 @@ export type McpServerEntry = {
 
 const MCP_PRESETS: Record<string, McpServerEntry> = {
   slack: {
-    type: "http",
-    url: "https://mcp.slack.com/mcp",
+    type: 'http',
+    url: 'https://mcp.slack.com/mcp',
   },
   linear: {
-    type: "http",
-    url: "https://mcp.linear.app/mcp",
+    type: 'http',
+    url: 'https://mcp.linear.app/mcp',
   },
 };
 
@@ -23,9 +23,9 @@ export function isKnownPreset(name: string): boolean {
 }
 
 export function validateMcpPresets(names: string[]): string | null {
-  const unknown = names.filter((n) => !isKnownPreset(n));
+  const unknown = names.filter(n => !isKnownPreset(n));
   if (unknown.length > 0) {
-    return `Unknown MCP preset(s): ${unknown.join(", ")}. Available: ${getPresetNames().join(", ")}`;
+    return `Unknown MCP preset(s): ${unknown.join(', ')}. Available: ${getPresetNames().join(', ')}`;
   }
   return null;
 }

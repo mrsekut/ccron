@@ -1,4 +1,4 @@
-import { plistLabel } from "./config";
+import { plistLabel } from './config';
 
 export async function bootstrap(plistPath: string): Promise<void> {
   const uid = process.getuid?.() ?? 501;
@@ -7,7 +7,7 @@ export async function bootstrap(plistPath: string): Promise<void> {
   if (result.exitCode !== 0) {
     const stderr = result.stderr.toString().trim();
     // Already bootstrapped is not an error
-    if (stderr.includes("service already bootstrapped")) return;
+    if (stderr.includes('service already bootstrapped')) return;
     throw new Error(`launchctl bootstrap failed: ${stderr}`);
   }
 }
@@ -19,7 +19,7 @@ export async function bootout(name: string): Promise<void> {
   if (result.exitCode !== 0) {
     const stderr = result.stderr.toString().trim();
     // Not found is not an error during removal
-    if (stderr.includes("Could not find service")) return;
+    if (stderr.includes('Could not find service')) return;
     throw new Error(`launchctl bootout failed: ${stderr}`);
   }
 }
@@ -49,7 +49,7 @@ export async function listOne(name: string): Promise<LaunchdStatus | null> {
   let pid: number | null = null;
   let lastExitStatus: number | null = null;
 
-  for (const line of output.split("\n")) {
+  for (const line of output.split('\n')) {
     const trimmed = line.trim();
     const pidMatch = trimmed.match(/^"PID"\s*=\s*(\d+)/);
     if (pidMatch) pid = Number(pidMatch[1]);

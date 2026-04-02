@@ -1,9 +1,9 @@
-import { readTaskConfig, logPath } from "../config";
-import { kickstart } from "../launchd";
-import { spawn } from "child_process";
+import { readTaskConfig, logPath } from '../config';
+import { kickstart } from '../launchd';
+import { spawn } from 'child_process';
 
 export async function runCommand(args: string[]): Promise<void> {
-  if (args.includes("--help") || args.includes("-h")) {
+  if (args.includes('--help') || args.includes('-h')) {
     console.log(`ccron run - Manually trigger a task
 
 Usage: ccron run <name>
@@ -18,7 +18,7 @@ Example:
 
   const name = args[0];
   if (!name) {
-    console.error("Usage: ccron run <name>");
+    console.error('Usage: ccron run <name>');
     process.exit(1);
   }
 
@@ -35,7 +35,7 @@ Example:
     log,
     await Bun.file(log)
       .text()
-      .catch(() => ""),
+      .catch(() => ''),
     {
       createPath: true,
     },
@@ -46,16 +46,16 @@ Example:
   console.log(`Started. Tailing log (Ctrl+C to stop):\n`);
 
   // tail -f the log file
-  const tail = spawn("tail", ["-f", log], {
-    stdio: ["ignore", "inherit", "inherit"],
+  const tail = spawn('tail', ['-f', log], {
+    stdio: ['ignore', 'inherit', 'inherit'],
   });
 
-  process.on("SIGINT", () => {
+  process.on('SIGINT', () => {
     tail.kill();
     process.exit(0);
   });
 
-  await new Promise<void>((resolve) => {
-    tail.on("close", () => resolve());
+  await new Promise<void>(resolve => {
+    tail.on('close', () => resolve());
   });
 }

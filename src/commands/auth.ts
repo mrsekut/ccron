@@ -1,8 +1,8 @@
-import { readTaskConfig, mcpConfigPath } from "../config";
-import { spawn } from "child_process";
+import { readTaskConfig, mcpConfigPath } from '../config';
+import { spawn } from 'child_process';
 
 export async function authCommand(args: string[]): Promise<void> {
-  if (args.includes("--help") || args.includes("-h")) {
+  if (args.includes('--help') || args.includes('-h')) {
     console.log(`ccron auth - Re-authenticate MCP servers for a task
 
 Usage: ccron auth <name>
@@ -20,7 +20,7 @@ Example:
 
   const name = args[0];
   if (!name) {
-    console.error("Usage: ccron auth <name>");
+    console.error('Usage: ccron auth <name>');
     process.exit(1);
   }
 
@@ -39,22 +39,22 @@ Example:
   if (!(await Bun.file(mcpConfig).exists())) {
     console.error(`MCP config not found: ${mcpConfig}`);
     console.error(
-      `Re-register with: ccron add --name ${name} --mcp ${task.mcp.join(",")}`,
+      `Re-register with: ccron add --name ${name} --mcp ${task.mcp.join(',')}`,
     );
     process.exit(1);
   }
 
   console.log(`Opening claude with MCP config for "${name}"...`);
-  console.log(`MCP servers: ${task.mcp.join(", ")}`);
+  console.log(`MCP servers: ${task.mcp.join(', ')}`);
   console.log(`Complete the authentication flow, then exit claude.\n`);
 
-  const child = spawn("claude", ["--mcp-config", mcpConfig], {
-    cwd: "/tmp",
-    stdio: "inherit",
+  const child = spawn('claude', ['--mcp-config', mcpConfig], {
+    cwd: '/tmp',
+    stdio: 'inherit',
   });
 
   await new Promise<void>((resolve, reject) => {
-    child.on("close", (code) => {
+    child.on('close', code => {
       if (code === 0) {
         console.log(`\nAuthentication complete for "${name}".`);
         resolve();
@@ -62,6 +62,6 @@ Example:
         reject(new Error(`claude exited with code ${code}`));
       }
     });
-    child.on("error", reject);
+    child.on('error', reject);
   });
 }

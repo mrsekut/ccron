@@ -4,9 +4,9 @@ import {
   scriptPath,
   plistPath,
   mcpConfigPath,
-} from "../config";
-import { listOne } from "../launchd";
-import { homedir } from "os";
+} from '../config';
+import { listOne } from '../launchd';
+import { homedir } from 'os';
 
 type CheckResult = {
   label: string;
@@ -16,7 +16,7 @@ type CheckResult = {
 };
 
 export async function testCommand(args: string[]): Promise<void> {
-  if (args.includes("--help") || args.includes("-h")) {
+  if (args.includes('--help') || args.includes('-h')) {
     console.log(`ccron test - Run environment checks for a task
 
 Usage: ccron test <name>
@@ -39,7 +39,7 @@ Example:
 
   const name = args[0];
   if (!name) {
-    console.error("Usage: ccron test <name>");
+    console.error('Usage: ccron test <name>');
     process.exit(1);
   }
 
@@ -76,8 +76,8 @@ Example:
     }
   }
 
-  const passed = checks.filter((c) => c.ok).length;
-  const failed = checks.filter((c) => !c.ok).length;
+  const passed = checks.filter(c => c.ok).length;
+  const failed = checks.filter(c => !c.ok).length;
   console.log(`\n${passed}/${checks.length} checks passed.`);
   if (failed > 0) {
     console.log(`${failed} issue(s) found.`);
@@ -92,21 +92,21 @@ async function checkClaudeCli(): Promise<CheckResult> {
       const path = result.stdout.toString().trim();
       // Try to get version
       const ver = await Bun.$`claude --version`.quiet();
-      const version = ver.exitCode === 0 ? ver.stdout.toString().trim() : "";
+      const version = ver.exitCode === 0 ? ver.stdout.toString().trim() : '';
       return {
-        label: "claude CLI",
+        label: 'claude CLI',
         ok: true,
-        detail: `found (${path}${version ? ` ${version}` : ""})`,
+        detail: `found (${path}${version ? ` ${version}` : ''})`,
       };
     }
   } catch {
     // fall through
   }
   return {
-    label: "claude CLI",
+    label: 'claude CLI',
     ok: false,
-    detail: "not found in PATH",
-    fix: "Install claude CLI or set path with ccron config",
+    detail: 'not found in PATH',
+    fix: 'Install claude CLI or set path with ccron config',
   };
 }
 
@@ -116,23 +116,23 @@ async function checkClaudeAuth(): Promise<CheckResult> {
     const output = result.stdout.toString() + result.stderr.toString();
     if (result.exitCode === 0) {
       return {
-        label: "claude auth",
+        label: 'claude auth',
         ok: true,
-        detail: "authenticated",
+        detail: 'authenticated',
       };
     }
     return {
-      label: "claude auth",
+      label: 'claude auth',
       ok: false,
-      detail: output.trim() || "not authenticated",
-      fix: "Run: claude auth login",
+      detail: output.trim() || 'not authenticated',
+      fix: 'Run: claude auth login',
     };
   } catch {
     return {
-      label: "claude auth",
+      label: 'claude auth',
       ok: false,
-      detail: "failed to check",
-      fix: "Run: claude auth login",
+      detail: 'failed to check',
+      fix: 'Run: claude auth login',
     };
   }
 }
@@ -144,21 +144,21 @@ async function checkUlimit(): Promise<CheckResult> {
     const current = Number(result.stdout.toString().trim());
     if (current >= global.ulimit) {
       return {
-        label: "ulimit -n",
+        label: 'ulimit -n',
         ok: true,
         detail: `${current} (sufficient)`,
       };
     }
     return {
-      label: "ulimit -n",
+      label: 'ulimit -n',
       ok: true, // Script sets it, so just a warning
       detail: `${current} (script will set to ${global.ulimit})`,
     };
   } catch {
     return {
-      label: "ulimit -n",
+      label: 'ulimit -n',
       ok: true,
-      detail: "could not check (script will set it)",
+      detail: 'could not check (script will set it)',
     };
   }
 }
@@ -167,7 +167,7 @@ async function checkScriptExists(name: string): Promise<CheckResult> {
   const path = scriptPath(name);
   const exists = await Bun.file(path).exists();
   return {
-    label: "script",
+    label: 'script',
     ok: exists,
     detail: exists ? `exists (${path})` : `not found (${path})`,
     fix: exists ? undefined : `Re-register: ccron add --name ${name} ...`,
@@ -178,15 +178,15 @@ function checkScriptTccSafe(name: string): CheckResult {
   const path = scriptPath(name);
   const home = homedir();
   const tccDirs = [`${home}/Desktop`, `${home}/Documents`, `${home}/Downloads`];
-  const inTcc = tccDirs.some((dir) => path.startsWith(dir));
+  const inTcc = tccDirs.some(dir => path.startsWith(dir));
   return {
-    label: "TCC protection",
+    label: 'TCC protection',
     ok: !inTcc,
     detail: inTcc
       ? `script is in TCC-protected directory`
       : `script path is outside TCC-protected directories`,
     fix: inTcc
-      ? "Move script outside ~/Desktop, ~/Documents, ~/Downloads"
+      ? 'Move script outside ~/Desktop, ~/Documents, ~/Downloads'
       : undefined,
   };
 }
@@ -198,15 +198,15 @@ async function checkPlistRegistered(name: string): Promise<CheckResult> {
 
   if (status) {
     return {
-      label: "launchd",
+      label: 'launchd',
       ok: true,
-      detail: `registered (pid: ${status.pid ?? "idle"})`,
+      detail: `registered (pid: ${status.pid ?? 'idle'})`,
     };
   }
   return {
-    label: "launchd",
+    label: 'launchd',
     ok: false,
-    detail: fileExists ? "plist exists but not loaded" : "plist not found",
+    detail: fileExists ? 'plist exists but not loaded' : 'plist not found',
     fix: `Re-register: ccron add --name ${name} ...`,
   };
 }
@@ -215,7 +215,7 @@ async function checkMcpConfig(name: string): Promise<CheckResult> {
   const path = mcpConfigPath(name);
   const exists = await Bun.file(path).exists();
   return {
-    label: "MCP config",
+    label: 'MCP config',
     ok: exists,
     detail: exists ? `exists (${path})` : `not found (${path})`,
     fix: exists ? undefined : `Re-register with --mcp flag`,

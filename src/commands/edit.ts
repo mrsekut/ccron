@@ -5,28 +5,28 @@ import {
   mcpConfigPath,
   scriptPath,
   plistPath,
-} from "../config";
-import { parseSchedule } from "../schedule";
-import { validateMcpPresets } from "../mcp";
+} from '../config';
+import { parseSchedule } from '../schedule';
+import { validateMcpPresets } from '../mcp';
 import {
   generateScriptContent,
   generatePlistContent,
   generateMcpConfigContent,
-} from "../generator";
-import { bootout, bootstrap } from "../launchd";
+} from '../generator';
+import { bootout, bootstrap } from '../launchd';
 
 export async function editCommand(args: string[]): Promise<void> {
-  const { parseArgs } = require("util");
+  const { parseArgs } = require('util');
   const { values, positionals } = parseArgs({
     args,
     options: {
-      schedule: { type: "string" },
-      prompt: { type: "string" },
-      "prompt-file": { type: "string" },
-      mcp: { type: "string" },
-      "allowed-tools": { type: "string" },
-      "max-turns": { type: "string" },
-      help: { type: "boolean", short: "h" },
+      schedule: { type: 'string' },
+      prompt: { type: 'string' },
+      'prompt-file': { type: 'string' },
+      mcp: { type: 'string' },
+      'allowed-tools': { type: 'string' },
+      'max-turns': { type: 'string' },
+      help: { type: 'boolean', short: 'h' },
     },
     allowPositionals: true,
     strict: true,
@@ -39,7 +39,7 @@ export async function editCommand(args: string[]): Promise<void> {
 
   const name = positionals[0] as string | undefined;
   if (!name) {
-    console.error("Usage: ccron edit <name> [options]");
+    console.error('Usage: ccron edit <name> [options]');
     process.exit(1);
   }
 
@@ -63,8 +63,8 @@ export async function editCommand(args: string[]): Promise<void> {
     changed = true;
   }
 
-  if (values["prompt-file"] !== undefined) {
-    task.promptFile = values["prompt-file"];
+  if (values['prompt-file'] !== undefined) {
+    task.promptFile = values['prompt-file'];
     task.prompt = null;
     if (!(await Bun.file(task.promptFile!).exists())) {
       console.error(`Prompt file not found: ${task.promptFile}`);
@@ -74,7 +74,7 @@ export async function editCommand(args: string[]): Promise<void> {
   }
 
   if (values.mcp !== undefined) {
-    const mcpNames = values.mcp.split(",").filter(Boolean);
+    const mcpNames = values.mcp.split(',').filter(Boolean);
     const mcpError = validateMcpPresets(mcpNames);
     if (mcpError) {
       console.error(`Error: ${mcpError}`);
@@ -84,18 +84,18 @@ export async function editCommand(args: string[]): Promise<void> {
     changed = true;
   }
 
-  if (values["allowed-tools"] !== undefined) {
-    task.allowedTools = values["allowed-tools"].split(",").filter(Boolean);
+  if (values['allowed-tools'] !== undefined) {
+    task.allowedTools = values['allowed-tools'].split(',').filter(Boolean);
     changed = true;
   }
 
-  if (values["max-turns"] !== undefined) {
-    task.maxTurns = Number(values["max-turns"]);
+  if (values['max-turns'] !== undefined) {
+    task.maxTurns = Number(values['max-turns']);
     changed = true;
   }
 
   if (!changed) {
-    console.log("No changes specified. Use --help to see available options.");
+    console.log('No changes specified. Use --help to see available options.');
     return;
   }
 
@@ -121,7 +121,7 @@ export async function editCommand(args: string[]): Promise<void> {
   const scriptContent = generateScriptContent(task, globalConfig);
   const scriptFile = scriptPath(task.name);
   await Bun.write(scriptFile, scriptContent);
-  const { chmod } = await import("fs/promises");
+  const { chmod } = await import('fs/promises');
   await chmod(scriptFile, 0o755);
   console.log(`✓ Script regenerated`);
 

@@ -41,6 +41,9 @@ import { listCommand } from "./commands/list";
 import { runCommand } from "./commands/run";
 import { logCommand } from "./commands/log";
 import { testCommand } from "./commands/test";
+import { removeCommand } from "./commands/remove";
+import { editCommand } from "./commands/edit";
+import { authCommand } from "./commands/auth";
 
 const commands: Record<string, (args: string[]) => Promise<void>> = {
   add: addCommand,
@@ -48,6 +51,9 @@ const commands: Record<string, (args: string[]) => Promise<void>> = {
   run: runCommand,
   log: logCommand,
   test: testCommand,
+  remove: removeCommand,
+  edit: editCommand,
+  auth: authCommand,
 };
 
 const handler = commands[command];

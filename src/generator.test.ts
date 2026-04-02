@@ -16,7 +16,7 @@ const baseGlobal: GlobalConfig = {
 function makeTask(overrides: Partial<TaskConfig> = {}): TaskConfig {
   return {
     name: "test-task",
-    schedule: "9:00 daily",
+    schedule: "0 9 * * *",
     prompt: "Hello world",
     promptFile: null,
     mcp: [],

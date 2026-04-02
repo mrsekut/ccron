@@ -22,8 +22,8 @@ Options:
   --help    Show help for a command
 
 Examples:
-  ccron add --name daily-summary --schedule "17:15 weekdays" --prompt-file ./prompts/daily.txt
-  ccron add --name weekly-review --schedule "22:00 fri" --prompt "週次レビューを作成して" --mcp slack
+  ccron add --name daily-summary --schedule "15 17 * * 1-5" --prompt-file ./prompts/daily.txt
+  ccron add --name weekly-review --schedule "0 22 * * 5" --prompt "週次レビューを作成して" --mcp slack
   ccron list
   ccron run daily-summary
   ccron test daily-summary

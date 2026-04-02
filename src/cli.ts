@@ -36,7 +36,11 @@ if (!command || command === "--help" || command === "-h") {
   process.exit(0);
 }
 
-const commands: Record<string, (args: string[]) => Promise<void>> = {};
+import { addCommand } from "./commands/add";
+
+const commands: Record<string, (args: string[]) => Promise<void>> = {
+  add: addCommand,
+};
 
 const handler = commands[command];
 if (!handler) {

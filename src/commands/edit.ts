@@ -25,7 +25,6 @@ export async function editCommand(args: string[]): Promise<void> {
       'prompt-file': { type: 'string' },
       mcp: { type: 'string' },
       'allowed-tools': { type: 'string' },
-      'max-turns': { type: 'string' },
       help: { type: 'boolean', short: 'h' },
     },
     allowPositionals: true,
@@ -89,11 +88,6 @@ export async function editCommand(args: string[]): Promise<void> {
     changed = true;
   }
 
-  if (values['max-turns'] !== undefined) {
-    task.maxTurns = Number(values['max-turns']);
-    changed = true;
-  }
-
   if (!changed) {
     console.log('No changes specified. Use --help to see available options.');
     return;
@@ -149,7 +143,6 @@ Options:
   --prompt-file <path>    Update prompt file (clears --prompt)
   --mcp <names>           Update MCP presets (comma-separated)
   --allowed-tools <tools> Update allowed tools (comma-separated)
-  --max-turns <n>         Update max turns
 
 Examples:
   ccron edit daily-summary --schedule "0 18 * * 1-5"

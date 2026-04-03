@@ -45,7 +45,6 @@ When a user asks to run something on a schedule:
 --prompt-file <path>    Prompt file path (mutually exclusive with --prompt)
 --mcp <names>           MCP presets, comma-separated (slack, linear)
 --allowed-tools <tools> Allowed tools (Bash,Read,Write,Edit,Glob,Grep)
---max-turns <n>         Maximum turns
 ```
 
 ## Schedule (cron)

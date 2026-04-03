@@ -21,7 +21,6 @@ function makeTask(overrides: Partial<TaskConfig> = {}): TaskConfig {
     promptFile: null,
     mcp: [],
     allowedTools: [],
-    maxTurns: null,
     createdAt: '2026-04-02T00:00:00Z',
     updatedAt: '2026-04-02T00:00:00Z',
     ...overrides,
@@ -75,13 +74,6 @@ describe('generateScriptContent', () => {
     expect(script).toContain('--allowedTools "Bash,Read,Write"');
   });
 
-  test('max-turns flag is included', () => {
-    const script = generateScriptContent(
-      makeTask({ maxTurns: 20 }),
-      baseGlobal,
-    );
-    expect(script).toContain('--max-turns 20');
-  });
 });
 
 describe('generatePlistContent', () => {

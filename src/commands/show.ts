@@ -53,7 +53,6 @@ Displays task configuration, launchd status, and file locations.`);
     `Prompt:     ${promptDisplay}`,
     `MCP:        ${task.mcp.length > 0 ? task.mcp.join(', ') : '(none)'}`,
     `Tools:      ${task.allowedTools.length > 0 ? task.allowedTools.join(', ') : '(none)'}`,
-    `Max turns:  ${task.maxTurns ?? '(default)'}`,
     `Status:     ${statusStr}`,
     `Last exit:  ${exitStr}`,
     `Created:    ${formatDate(task.createdAt)}`,

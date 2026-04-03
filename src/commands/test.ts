@@ -29,6 +29,7 @@ Checks:
   5. Script path is outside TCC-protected directories
   6. Plist registered in launchd
   7. MCP config exists (if task uses MCP)
+  8. MCP auth (if task uses MCP) — runs claude CLI to verify OAuth tokens
 
 Each failed check shows a suggested fix command.
 
@@ -62,6 +63,7 @@ Example:
 
   if (task.mcp.length > 0) {
     checks.push(await checkMcpConfig(name));
+    checks.push(await checkMcpAuth(name));
   }
 
   // Print results
@@ -220,4 +222,51 @@ async function checkMcpConfig(name: string): Promise<CheckResult> {
     detail: exists ? `exists (${path})` : `not found (${path})`,
     fix: exists ? undefined : `Re-register with --mcp flag`,
   };
+}
+
+async function checkMcpAuth(name: string): Promise<CheckResult> {
+  const configPath = mcpConfigPath(name);
+  const exists = await Bun.file(configPath).exists();
+  if (!exists) {
+    return {
+      label: 'MCP auth',
+      ok: false,
+      detail: 'skipped (MCP config file missing)',
+      fix: `Re-register with --mcp flag`,
+    };
+  }
+
+  try {
+    const result =
+      await Bun.$`claude -p 'test' --mcp-config ${configPath} --max-turns 1`
+        .quiet()
+        .timeout(30_000);
+    if (result.exitCode === 0) {
+      return {
+        label: 'MCP auth',
+        ok: true,
+        detail: 'authenticated',
+      };
+    }
+    const output = (
+      result.stdout.toString() + result.stderr.toString()
+    ).trim();
+    return {
+      label: 'MCP auth',
+      ok: false,
+      detail: output || 'authentication failed',
+      fix: `Run: ccron auth ${name}`,
+    };
+  } catch (e) {
+    const message =
+      e instanceof Error && e.message.includes('timed out')
+        ? 'timed out (30s)'
+        : 'failed to check';
+    return {
+      label: 'MCP auth',
+      ok: false,
+      detail: message,
+      fix: `Run: ccron auth ${name}`,
+    };
+  }
 }

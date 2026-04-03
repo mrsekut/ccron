@@ -51,7 +51,7 @@ ccron list
 | `ccron log <name>`    | Show logs (`--follow` for tail)    |
 | `ccron edit <name>`   | Edit config, regenerate and reload |
 | `ccron auth <name>`   | Re-authenticate MCP servers        |
-| `ccron remove <name>` | Remove task (`--purge` for logs)   |
+| `ccron remove <name>` | Remove task and logs               |
 
 ## Schedule Format
 

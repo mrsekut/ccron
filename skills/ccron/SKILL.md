@@ -34,7 +34,7 @@ When a user asks to run something on a schedule:
 | `ccron log <name>`    | Show logs (`--follow` for tail)      |
 | `ccron auth <name>`   | Re-authenticate MCP servers          |
 | `ccron edit <name>`   | Edit config, regenerate and reload   |
-| `ccron remove <name>` | Remove task (`--purge` for logs too) |
+| `ccron remove <name>` | Remove task and logs                 |
 
 ## ccron add Options
 

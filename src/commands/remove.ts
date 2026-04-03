@@ -13,27 +13,22 @@ export async function removeCommand(args: string[]): Promise<void> {
   if (args.includes('--help') || args.includes('-h')) {
     console.log(`ccron remove - Remove a registered task
 
-Usage: ccron remove <name> [--purge]
+Usage: ccron remove <name>
 
 Removes a task by:
   1. Unregistering from launchd (launchctl bootout)
-  2. Deleting plist, script, task config
+  2. Deleting plist, script, task config, log files
   3. Deleting MCP config (if not used by other tasks)
 
-Options:
-  --purge   Also delete log files (logs are kept by default)
-
 Examples:
-  ccron remove daily-summary
-  ccron remove daily-summary --purge`);
+  ccron remove daily-summary`);
     return;
   }
 
-  const purge = args.includes('--purge');
   const name = args.find(a => !a.startsWith('-'));
 
   if (!name) {
-    console.error('Usage: ccron remove <name> [--purge]');
+    console.error('Usage: ccron remove <name>');
     process.exit(1);
   }
 
@@ -73,13 +68,9 @@ Examples:
   await deleteTaskConfig(name);
   console.log(`✓ Task config removed`);
 
-  // 6. Logs
-  if (purge) {
-    await tryUnlink(logPath(name));
-    console.log(`✓ Logs purged`);
-  } else {
-    console.log(`  Logs kept at ${logPath(name)} (use --purge to remove)`);
-  }
+  // 6. Delete logs
+  await tryUnlink(logPath(name));
+  console.log(`✓ Logs removed`);
 
   console.log(`\n"${name}" removed.`);
 }

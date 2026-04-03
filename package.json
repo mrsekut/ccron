@@ -1,6 +1,6 @@
 {
   "name": "@mrsekut/ccron",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Schedule claude -p execution on macOS with launchd",
   "type": "module",
   "license": "MIT",

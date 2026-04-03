@@ -29,7 +29,7 @@ Then tell Claude: "Schedule a daily summary to Slack at 5pm on weekdays" and it 
 ccron add \
   --name daily-summary \
   --schedule "15 17 * * 1-5" \
-  --prompt-file ./prompts/daily-summary.txt \
+  --prompt "日次サマリーを作成して #daily-summary チャンネルに投稿して" \
   --mcp slack
 
 # Verify setup

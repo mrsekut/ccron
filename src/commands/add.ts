@@ -24,7 +24,6 @@ type AddOptions = {
   name: string;
   schedule: string;
   prompt: string | null;
-  promptFile: string | null;
   mcp: string[];
   allowedTools: string[];
 };
@@ -46,7 +45,6 @@ export async function addCommand(args: string[]): Promise<void> {
     name: opts.name,
     schedule: opts.schedule,
     prompt: opts.prompt,
-    promptFile: opts.promptFile,
     mcp: opts.mcp,
     allowedTools: opts.allowedTools,
     createdAt: now,
@@ -97,7 +95,6 @@ function parseAddArgs(args: string[]): AddOptions {
       name: { type: 'string' },
       schedule: { type: 'string' },
       prompt: { type: 'string' },
-      'prompt-file': { type: 'string' },
       mcp: { type: 'string' },
       'allowed-tools': { type: 'string' },
       help: { type: 'boolean', short: 'h' },
@@ -114,7 +111,6 @@ function parseAddArgs(args: string[]): AddOptions {
     name: values.name ?? '',
     schedule: values.schedule ?? '',
     prompt: values.prompt ?? null,
-    promptFile: values['prompt-file'] ?? null,
     mcp: values.mcp ? values.mcp.split(',').filter(Boolean) : [],
     allowedTools: values['allowed-tools']
       ? values['allowed-tools'].split(',').filter(Boolean)
@@ -147,17 +143,8 @@ async function validateOptions(opts: AddOptions): Promise<void> {
   }
 
   // Prompt
-  if (!opts.prompt && !opts.promptFile) {
-    errors.push('Either --prompt or --prompt-file is required');
-  }
-  if (opts.prompt && opts.promptFile) {
-    errors.push('Cannot specify both --prompt and --prompt-file');
-  }
-  if (opts.promptFile) {
-    const file = Bun.file(opts.promptFile);
-    if (!(await file.exists())) {
-      errors.push(`Prompt file not found: ${opts.promptFile}`);
-    }
+  if (!opts.prompt) {
+    errors.push('--prompt is required');
   }
 
   // MCP
@@ -214,8 +201,7 @@ Usage: ccron add [options]
 Required:
   --name <name>           Task name (lowercase letters, numbers, hyphens)
   --schedule <cron>       Cron expression: "minute hour * * day-of-week"
-  --prompt <text>         Prompt string (mutually exclusive with --prompt-file)
-  --prompt-file <path>    Path to prompt file (mutually exclusive with --prompt)
+  --prompt <text>         Prompt string
 
 Optional:
   --mcp <names>           MCP server presets, comma-separated (slack, linear)
@@ -230,7 +216,7 @@ Schedule format (cron):
   day-of-month and month: must be "*" (launchd limitation)
 
 Examples:
-  ccron add --name daily-summary --schedule "15 17 * * 1-5" --prompt-file ./prompts/daily.txt
+  ccron add --name daily-summary --schedule "15 17 * * 1-5" --prompt "日次サマリーを作成して"
   ccron add --name weekly-review --schedule "0 22 * * 5" --prompt "週次レビューを作成して" --mcp slack
   ccron add --name hourly-check --schedule "0 9 * * *" --prompt "ステータスチェック" --allowed-tools "Bash,Read"
 

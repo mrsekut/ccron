@@ -42,7 +42,7 @@ File locations:
   Logs:          ~/.local/share/ccron/logs/<name>.log
 
 Examples:
-  ccron add --name daily-summary --schedule "15 17 * * 1-5" --prompt-file ./prompts/daily.txt
+  ccron add --name daily-summary --schedule "15 17 * * 1-5" --prompt "日次サマリーを作成して"
   ccron add --name weekly-review --schedule "0 22 * * 5" --prompt "週次レビュー" --mcp slack
   ccron list
   ccron show daily-summary

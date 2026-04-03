@@ -18,7 +18,6 @@ function makeTask(overrides: Partial<TaskConfig> = {}): TaskConfig {
     name: 'test-task',
     schedule: '0 9 * * *',
     prompt: 'Hello world',
-    promptFile: null,
     mcp: [],
     allowedTools: [],
     createdAt: '2026-04-02T00:00:00Z',
@@ -38,15 +37,6 @@ describe('generateScriptContent', () => {
     expect(script).toContain('cd /tmp');
     expect(script).toContain("PROMPT='Hello world'");
     expect(script).toContain('claude -p "$PROMPT"');
-  });
-
-  test('prompt-file uses cat', () => {
-    const script = generateScriptContent(
-      makeTask({ prompt: null, promptFile: '/path/to/prompt.txt' }),
-      baseGlobal,
-    );
-    expect(script).toContain('PROMPT=$(cat "/path/to/prompt.txt")');
-    expect(script).not.toContain("PROMPT='");
   });
 
   test('prompt with single quotes is escaped', () => {

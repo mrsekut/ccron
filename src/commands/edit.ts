@@ -22,7 +22,6 @@ export async function editCommand(args: string[]): Promise<void> {
     options: {
       schedule: { type: 'string' },
       prompt: { type: 'string' },
-      'prompt-file': { type: 'string' },
       mcp: { type: 'string' },
       'allowed-tools': { type: 'string' },
       help: { type: 'boolean', short: 'h' },
@@ -58,17 +57,6 @@ export async function editCommand(args: string[]): Promise<void> {
 
   if (values.prompt !== undefined) {
     task.prompt = values.prompt;
-    task.promptFile = null;
-    changed = true;
-  }
-
-  if (values['prompt-file'] !== undefined) {
-    task.promptFile = values['prompt-file'];
-    task.prompt = null;
-    if (!(await Bun.file(task.promptFile!).exists())) {
-      console.error(`Prompt file not found: ${task.promptFile}`);
-      process.exit(1);
-    }
     changed = true;
   }
 
@@ -139,13 +127,12 @@ Usage: ccron edit <name> [options]
 
 Options:
   --schedule <cron>       Update cron expression
-  --prompt <text>         Update prompt (clears --prompt-file)
-  --prompt-file <path>    Update prompt file (clears --prompt)
+  --prompt <text>         Update prompt
   --mcp <names>           Update MCP presets (comma-separated)
   --allowed-tools <tools> Update allowed tools (comma-separated)
 
 Examples:
   ccron edit daily-summary --schedule "0 18 * * 1-5"
-  ccron edit daily-summary --prompt-file ./prompts/v2.txt
+  ccron edit daily-summary --prompt "新しいプロンプト"
   ccron edit daily-summary --mcp slack,linear`);
 }

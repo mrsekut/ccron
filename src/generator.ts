@@ -37,9 +37,7 @@ export function generateScriptContent(
   ];
 
   // Prompt handling
-  if (task.promptFile) {
-    lines.push(`PROMPT=$(cat "${task.promptFile}")`);
-  } else if (task.prompt) {
+  if (task.prompt) {
     // Escape single quotes for bash
     const escaped = task.prompt.replace(/'/g, "'\\''");
     lines.push(`PROMPT='${escaped}'`);

@@ -7,7 +7,6 @@ export type TaskConfig = {
   name: string;
   schedule: string;
   prompt: string | null;
-  promptFile: string | null;
   mcp: string[];
   allowedTools: string[];
   createdAt: string;

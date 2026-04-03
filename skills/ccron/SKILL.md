@@ -16,9 +16,8 @@ Schedule `claude -p` on macOS via launchd. Handles all the tricky launchd setup 
 
 When a user asks to run something on a schedule:
 
-1. Create a prompt file (`./prompts/<name>.txt` or similar, git-manageable location)
-2. Register with `ccron add`
-3. Verify with `ccron test <name>`
+1. Register with `ccron add --prompt "<prompt text>"`
+2. Verify with `ccron test <name>`
 
 **Always run `ccron <command> --help` to check the latest options.**
 
@@ -41,8 +40,7 @@ When a user asks to run something on a schedule:
 ```
 --name <name>           Task name (lowercase, numbers, hyphens)
 --schedule "<cron>"     Cron expression: "minute hour * * day-of-week"
---prompt "<text>"       Prompt string (mutually exclusive with --prompt-file)
---prompt-file <path>    Prompt file path (mutually exclusive with --prompt)
+--prompt "<text>"       Prompt string
 --mcp <names>           MCP presets, comma-separated (slack, linear)
 --allowed-tools <tools> Allowed tools (Bash,Read,Write,Edit,Glob,Grep)
 ```
@@ -65,20 +63,14 @@ Format: `"minute hour * * day-of-week"` (5 fields)
 User: "Post a daily summary to Slack at 5pm on weekdays"
 
 ```bash
-# 1. Create prompt file
-cat > ./prompts/daily-summary.txt << 'EOF'
-Create a daily summary and post it to #daily-summary channel.
-Include: completed tasks, tomorrow's plan, blockers.
-EOF
-
-# 2. Register
+# 1. Register
 ccron add \
   --name daily-summary \
   --schedule "0 17 * * 1-5" \
-  --prompt-file ./prompts/daily-summary.txt \
+  --prompt "Create a daily summary and post it to #daily-summary channel. Include: completed tasks, tomorrow's plan, blockers." \
   --mcp slack
 
-# 3. Verify
+# 2. Verify
 ccron test daily-summary
 ```
 
@@ -86,5 +78,5 @@ ccron test daily-summary
 
 - `ccron test` fails: follow the suggested fix commands in the output
 - MCP auth expired: `ccron auth <name>`
-- Prompt change: just edit the file if using `--prompt-file` (no re-registration needed)
+- Prompt change: `ccron edit <name> --prompt "<new prompt>"`
 - Schedule change: `ccron edit <name> --schedule "<cron>"`

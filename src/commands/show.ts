@@ -41,9 +41,8 @@ Displays task configuration, launchd status, and file locations.`);
       ? String(status.lastExitStatus)
       : '-';
 
-  const promptDisplay = task.promptFile
-    ? `(file) ${task.promptFile}`
-    : task.prompt && task.prompt.length > 80
+  const promptDisplay =
+    task.prompt && task.prompt.length > 80
       ? task.prompt.slice(0, 80) + '...'
       : (task.prompt ?? '(none)');
 

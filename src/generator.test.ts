@@ -2,7 +2,6 @@ import { test, expect, describe } from 'bun:test';
 import {
   generateScriptContent,
   generatePlistContent,
-  generateMcpConfigContent,
 } from './generator';
 import type { TaskConfig, GlobalConfig } from './config';
 import type { CalendarInterval } from './schedule';
@@ -18,8 +17,7 @@ function makeTask(overrides: Partial<TaskConfig> = {}): TaskConfig {
     name: 'test-task',
     schedule: '0 9 * * *',
     prompt: 'Hello world',
-    mcp: [],
-    allowedTools: [],
+    mcpConfig: null,
     createdAt: '2026-04-02T00:00:00Z',
     updatedAt: '2026-04-02T00:00:00Z',
     ...overrides,
@@ -47,23 +45,18 @@ describe('generateScriptContent', () => {
     expect(script).toContain("PROMPT='it'\\''s a test'");
   });
 
-  test('mcp config flag is included', () => {
+  test('mcp-config flag is included', () => {
     const script = generateScriptContent(
-      makeTask({ mcp: ['slack'] }),
+      makeTask({ mcpConfig: '/path/to/mcp.json' }),
       baseGlobal,
     );
-    expect(script).toContain('--mcp-config');
-    expect(script).toContain('ccron/mcp/test-task.json');
+    expect(script).toContain('--mcp-config "/path/to/mcp.json"');
   });
 
-  test('allowed tools flag is included', () => {
-    const script = generateScriptContent(
-      makeTask({ allowedTools: ['Bash', 'Read', 'Write'] }),
-      baseGlobal,
-    );
-    expect(script).toContain('--allowedTools "Bash,Read,Write"');
+  test('no mcp-config flag when null', () => {
+    const script = generateScriptContent(makeTask(), baseGlobal);
+    expect(script).not.toContain('--mcp-config');
   });
-
 });
 
 describe('generatePlistContent', () => {
@@ -111,27 +104,5 @@ describe('generatePlistContent', () => {
     expect(plist).toContain('StandardOutPath');
     expect(plist).toContain('StandardErrorPath');
     expect(plist).toContain('ccron/logs/test-task.log');
-  });
-});
-
-describe('generateMcpConfigContent', () => {
-  test('generates valid JSON with mcpServers', () => {
-    const content = generateMcpConfigContent(['slack']);
-    const parsed = JSON.parse(content);
-    expect(parsed.mcpServers).toBeDefined();
-    expect(parsed.mcpServers.slack).toEqual({
-      type: 'http',
-      url: 'https://mcp.slack.com/mcp',
-    });
-  });
-
-  test('multiple presets', () => {
-    const content = generateMcpConfigContent(['slack', 'linear']);
-    const parsed = JSON.parse(content);
-    expect(Object.keys(parsed.mcpServers)).toEqual(['slack', 'linear']);
-  });
-
-  test('throws on unknown preset', () => {
-    expect(() => generateMcpConfigContent(['unknown'])).toThrow();
   });
 });

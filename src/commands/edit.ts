@@ -2,16 +2,13 @@ import {
   readTaskConfig,
   writeTaskConfig,
   readGlobalConfig,
-  mcpConfigPath,
   scriptPath,
   plistPath,
 } from '../config';
 import { parseSchedule } from '../schedule';
-import { validateMcpPresets } from '../mcp';
 import {
   generateScriptContent,
   generatePlistContent,
-  generateMcpConfigContent,
 } from '../generator';
 import { bootout, bootstrap } from '../launchd';
 
@@ -22,8 +19,7 @@ export async function editCommand(args: string[]): Promise<void> {
     options: {
       schedule: { type: 'string' },
       prompt: { type: 'string' },
-      mcp: { type: 'string' },
-      'allowed-tools': { type: 'string' },
+      'mcp-config': { type: 'string' },
       help: { type: 'boolean', short: 'h' },
     },
     allowPositionals: true,
@@ -60,19 +56,13 @@ export async function editCommand(args: string[]): Promise<void> {
     changed = true;
   }
 
-  if (values.mcp !== undefined) {
-    const mcpNames = values.mcp.split(',').filter(Boolean);
-    const mcpError = validateMcpPresets(mcpNames);
-    if (mcpError) {
-      console.error(`Error: ${mcpError}`);
+  if (values['mcp-config'] !== undefined) {
+    const mcpPath = values['mcp-config'];
+    if (mcpPath && !(await Bun.file(mcpPath).exists())) {
+      console.error(`MCP config file not found: ${mcpPath}`);
       process.exit(1);
     }
-    task.mcp = mcpNames;
-    changed = true;
-  }
-
-  if (values['allowed-tools'] !== undefined) {
-    task.allowedTools = values['allowed-tools'].split(',').filter(Boolean);
+    task.mcpConfig = mcpPath || null;
     changed = true;
   }
 
@@ -89,15 +79,6 @@ export async function editCommand(args: string[]): Promise<void> {
   // Update task config
   await writeTaskConfig(task);
   console.log(`✓ Task config updated`);
-
-  // Regenerate MCP config
-  if (task.mcp.length > 0) {
-    await Bun.write(
-      mcpConfigPath(task.name),
-      generateMcpConfigContent(task.mcp),
-    );
-    console.log(`✓ MCP config regenerated`);
-  }
 
   // Regenerate script
   const scriptContent = generateScriptContent(task, globalConfig);
@@ -128,11 +109,10 @@ Usage: ccron edit <name> [options]
 Options:
   --schedule <cron>       Update cron expression
   --prompt <text>         Update prompt
-  --mcp <names>           Update MCP presets (comma-separated)
-  --allowed-tools <tools> Update allowed tools (comma-separated)
+  --mcp-config <path>     Update MCP config file path (pass "" to remove)
 
 Examples:
   ccron edit daily-summary --schedule "0 18 * * 1-5"
   ccron edit daily-summary --prompt "新しいプロンプト"
-  ccron edit daily-summary --mcp slack,linear`);
+  ccron edit daily-summary --mcp-config ~/.config/ccron/mcp/slack.json`);
 }

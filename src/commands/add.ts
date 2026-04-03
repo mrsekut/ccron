@@ -7,16 +7,13 @@ import {
   readGlobalConfig,
   writeGlobalConfig,
   ensureDirectories,
-  mcpConfigPath,
   scriptPath,
   plistPath,
 } from '../config';
 import { parseSchedule } from '../schedule';
-import { validateMcpPresets } from '../mcp';
 import {
   generateScriptContent,
   generatePlistContent,
-  generateMcpConfigContent,
 } from '../generator';
 import { bootstrap } from '../launchd';
 
@@ -24,8 +21,7 @@ type AddOptions = {
   name: string;
   schedule: string;
   prompt: string | null;
-  mcp: string[];
-  allowedTools: string[];
+  mcpConfig: string | null;
 };
 
 export async function addCommand(args: string[]): Promise<void> {
@@ -45,8 +41,7 @@ export async function addCommand(args: string[]): Promise<void> {
     name: opts.name,
     schedule: opts.schedule,
     prompt: opts.prompt,
-    mcp: opts.mcp,
-    allowedTools: opts.allowedTools,
+    mcpConfig: opts.mcpConfig,
     createdAt: now,
     updatedAt: now,
   };
@@ -54,13 +49,6 @@ export async function addCommand(args: string[]): Promise<void> {
   // Save task config
   await writeTaskConfig(task);
   console.log(`✓ Task config saved: ~/.config/ccron/tasks/${task.name}.json`);
-
-  // Generate MCP config if needed
-  if (task.mcp.length > 0) {
-    const mcpContent = generateMcpConfigContent(task.mcp);
-    await Bun.write(mcpConfigPath(task.name), mcpContent);
-    console.log(`✓ MCP config saved: ~/.config/ccron/mcp/${task.name}.json`);
-  }
 
   // Generate script
   const scriptContent = generateScriptContent(task, globalConfig);
@@ -95,8 +83,7 @@ function parseAddArgs(args: string[]): AddOptions {
       name: { type: 'string' },
       schedule: { type: 'string' },
       prompt: { type: 'string' },
-      mcp: { type: 'string' },
-      'allowed-tools': { type: 'string' },
+      'mcp-config': { type: 'string' },
       help: { type: 'boolean', short: 'h' },
     },
     strict: true,
@@ -111,10 +98,7 @@ function parseAddArgs(args: string[]): AddOptions {
     name: values.name ?? '',
     schedule: values.schedule ?? '',
     prompt: values.prompt ?? null,
-    mcp: values.mcp ? values.mcp.split(',').filter(Boolean) : [],
-    allowedTools: values['allowed-tools']
-      ? values['allowed-tools'].split(',').filter(Boolean)
-      : [],
+    mcpConfig: values['mcp-config'] ?? null,
   };
 }
 
@@ -147,10 +131,12 @@ async function validateOptions(opts: AddOptions): Promise<void> {
     errors.push('--prompt is required');
   }
 
-  // MCP
-  if (opts.mcp.length > 0) {
-    const mcpError = validateMcpPresets(opts.mcp);
-    if (mcpError) errors.push(mcpError);
+  // MCP config file
+  if (opts.mcpConfig) {
+    const file = Bun.file(opts.mcpConfig);
+    if (!(await file.exists())) {
+      errors.push(`MCP config file not found: ${opts.mcpConfig}`);
+    }
   }
 
   if (errors.length > 0) {
@@ -204,8 +190,7 @@ Required:
   --prompt <text>         Prompt string
 
 Optional:
-  --mcp <names>           MCP server presets, comma-separated (slack, linear)
-  --allowed-tools <tools> Allowed tools, comma-separated (Bash,Read,Write,Edit,Glob,Grep)
+  --mcp-config <path>     Path to MCP config JSON file
 
 Schedule format (cron):
   "minute hour * * day-of-week"
@@ -217,8 +202,7 @@ Schedule format (cron):
 
 Examples:
   ccron add --name daily-summary --schedule "15 17 * * 1-5" --prompt "日次サマリーを作成して"
-  ccron add --name weekly-review --schedule "0 22 * * 5" --prompt "週次レビューを作成して" --mcp slack
-  ccron add --name hourly-check --schedule "0 9 * * *" --prompt "ステータスチェック" --allowed-tools "Bash,Read"
+  ccron add --name weekly-review --schedule "0 22 * * 5" --prompt "週次レビューを作成して" --mcp-config ~/.config/ccron/mcp/slack.json
 
 Note: Step values (*/5) and ranges in minute/hour are not supported by launchd.`);
 }

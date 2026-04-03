@@ -1,7 +1,6 @@
 import type { TaskConfig, GlobalConfig } from './config';
 import type { CalendarInterval } from './schedule';
-import { logPath, mcpConfigPath, plistLabel, scriptPath } from './config';
-import { buildMcpConfig } from './mcp';
+import { logPath, plistLabel, scriptPath } from './config';
 import { homedir } from 'os';
 
 /**
@@ -48,12 +47,8 @@ export function generateScriptContent(
   // Build claude command
   const claudeArgs: string[] = ['claude -p "$PROMPT"'];
 
-  if (task.mcp.length > 0) {
-    claudeArgs.push(`  --mcp-config "${mcpConfigPath(task.name)}"`);
-  }
-
-  if (task.allowedTools.length > 0) {
-    claudeArgs.push(`  --allowedTools "${task.allowedTools.join(',')}"`);
+  if (task.mcpConfig) {
+    claudeArgs.push(`  --mcp-config "${task.mcpConfig}"`);
   }
 
   lines.push(claudeArgs.join(' \\\n'));
@@ -155,10 +150,3 @@ function escapeXml(str: string): string {
     .replace(/'/g, '&apos;');
 }
 
-/**
- * Generate MCP config JSON string from task's MCP presets.
- */
-export function generateMcpConfigContent(presets: string[]): string {
-  const config = buildMcpConfig(presets);
-  return JSON.stringify(config, null, 2);
-}

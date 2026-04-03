@@ -7,8 +7,7 @@ export type TaskConfig = {
   name: string;
   schedule: string;
   prompt: string | null;
-  mcp: string[];
-  allowedTools: string[];
+  mcpConfig: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -26,7 +25,6 @@ const home = homedir();
 export const PATHS = {
   configDir: join(home, '.config', 'ccron'),
   tasksDir: join(home, '.config', 'ccron', 'tasks'),
-  mcpDir: join(home, '.config', 'ccron', 'mcp'),
   globalConfig: join(home, '.config', 'ccron', 'config.json'),
   binDir: join(home, '.local', 'bin'),
   logsDir: join(home, '.local', 'share', 'ccron', 'logs'),
@@ -35,10 +33,6 @@ export const PATHS = {
 
 export function taskConfigPath(name: string): string {
   return join(PATHS.tasksDir, `${name}.json`);
-}
-
-export function mcpConfigPath(name: string): string {
-  return join(PATHS.mcpDir, `${name}.json`);
 }
 
 export function scriptPath(name: string): string {
@@ -63,7 +57,6 @@ export async function ensureDirectories(): Promise<void> {
   const { mkdir } = await import('fs/promises');
   await Promise.all([
     mkdir(PATHS.tasksDir, { recursive: true }),
-    mkdir(PATHS.mcpDir, { recursive: true }),
     mkdir(PATHS.binDir, { recursive: true }),
     mkdir(PATHS.logsDir, { recursive: true }),
     mkdir(PATHS.launchAgentsDir, { recursive: true }),

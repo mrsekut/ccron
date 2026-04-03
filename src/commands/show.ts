@@ -4,7 +4,6 @@ import {
   plistPath,
   logPath,
   taskConfigPath,
-  mcpConfigPath,
 } from '../config';
 import { listOne } from '../launchd';
 
@@ -50,8 +49,7 @@ Displays task configuration, launchd status, and file locations.`);
     `Name:       ${task.name}`,
     `Schedule:   ${task.schedule}`,
     `Prompt:     ${promptDisplay}`,
-    `MCP:        ${task.mcp.length > 0 ? task.mcp.join(', ') : '(none)'}`,
-    `Tools:      ${task.allowedTools.length > 0 ? task.allowedTools.join(', ') : '(none)'}`,
+    `MCP config: ${task.mcpConfig ?? '(none)'}`,
     `Status:     ${statusStr}`,
     `Last exit:  ${exitStr}`,
     `Created:    ${formatDate(task.createdAt)}`,
@@ -63,10 +61,6 @@ Displays task configuration, launchd status, and file locations.`);
     `  Plist:    ${shorten(plistPath(name))}`,
     `  Log:      ${shorten(logPath(name))}`,
   ];
-
-  if (task.mcp.length > 0) {
-    lines.push(`  MCP:      ${shorten(mcpConfigPath(name))}`);
-  }
 
   console.log(lines.join('\n'));
 }

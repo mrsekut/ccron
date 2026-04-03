@@ -1,4 +1,4 @@
-import { readTaskConfig, mcpConfigPath } from '../config';
+import { readTaskConfig } from '../config';
 import { spawn } from 'child_process';
 
 export async function authCommand(args: string[]): Promise<void> {
@@ -8,7 +8,7 @@ export async function authCommand(args: string[]): Promise<void> {
 Usage: ccron auth <name>
 
 Opens an interactive claude session with the task's MCP config, allowing
-you to complete OAuth flows for MCP servers (Slack, Linear, etc.).
+you to complete OAuth flows for MCP servers.
 The session runs from /tmp to avoid git repo issues.
 
 Exit claude after authentication is complete.
@@ -30,25 +30,21 @@ Example:
     process.exit(1);
   }
 
-  if (task.mcp.length === 0) {
-    console.log(`Task "${name}" has no MCP servers configured.`);
+  if (!task.mcpConfig) {
+    console.log(`Task "${name}" has no MCP config.`);
     return;
   }
 
-  const mcpConfig = mcpConfigPath(name);
-  if (!(await Bun.file(mcpConfig).exists())) {
-    console.error(`MCP config not found: ${mcpConfig}`);
-    console.error(
-      `Re-register with: ccron add --name ${name} --mcp ${task.mcp.join(',')}`,
-    );
+  if (!(await Bun.file(task.mcpConfig).exists())) {
+    console.error(`MCP config not found: ${task.mcpConfig}`);
     process.exit(1);
   }
 
   console.log(`Opening claude with MCP config for "${name}"...`);
-  console.log(`MCP servers: ${task.mcp.join(', ')}`);
+  console.log(`MCP config: ${task.mcpConfig}`);
   console.log(`Complete the authentication flow, then exit claude.\n`);
 
-  const child = spawn('claude', ['--mcp-config', mcpConfig], {
+  const child = spawn('claude', ['--mcp-config', task.mcpConfig], {
     cwd: '/tmp',
     stdio: 'inherit',
   });

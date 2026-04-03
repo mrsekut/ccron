@@ -3,9 +3,7 @@ import {
   deleteTaskConfig,
   scriptPath,
   plistPath,
-  mcpConfigPath,
   logPath,
-  listTaskConfigs,
 } from '../config';
 import { bootout } from '../launchd';
 
@@ -18,7 +16,6 @@ Usage: ccron remove <name>
 Removes a task by:
   1. Unregistering from launchd (launchctl bootout)
   2. Deleting plist, script, task config, log files
-  3. Deleting MCP config (if not used by other tasks)
 
 Examples:
   ccron remove daily-summary`);
@@ -50,25 +47,11 @@ Examples:
   await tryUnlink(scriptPath(name));
   console.log(`✓ Script removed`);
 
-  // 4. Delete MCP config if not shared by other tasks
-  if (task.mcp.length > 0) {
-    const otherTasks = await listTaskConfigs();
-    const otherUsing = otherTasks.some(
-      t => t.name !== name && t.mcp.some(m => task.mcp.includes(m)),
-    );
-    if (!otherUsing) {
-      await tryUnlink(mcpConfigPath(name));
-      console.log(`✓ MCP config removed`);
-    } else {
-      console.log(`  MCP config kept (used by other tasks)`);
-    }
-  }
-
-  // 5. Delete task config
+  // 4. Delete task config
   await deleteTaskConfig(name);
   console.log(`✓ Task config removed`);
 
-  // 6. Delete logs
+  // 5. Delete logs
   await tryUnlink(logPath(name));
   console.log(`✓ Logs removed`);
 

@@ -3,7 +3,6 @@ import {
   readGlobalConfig,
   scriptPath,
   plistPath,
-  mcpConfigPath,
 } from '../config';
 import { listOne } from '../launchd';
 import { homedir } from 'os';
@@ -61,9 +60,9 @@ Example:
   checks.push(checkScriptTccSafe(name));
   checks.push(await checkPlistRegistered(name));
 
-  if (task.mcp.length > 0) {
-    checks.push(await checkMcpConfig(name));
-    checks.push(await checkMcpAuth(name));
+  if (task.mcpConfig) {
+    checks.push(await checkMcpConfig(task.mcpConfig));
+    checks.push(await checkMcpAuth(name, task.mcpConfig));
   }
 
   // Print results
@@ -213,32 +212,30 @@ async function checkPlistRegistered(name: string): Promise<CheckResult> {
   };
 }
 
-async function checkMcpConfig(name: string): Promise<CheckResult> {
-  const path = mcpConfigPath(name);
-  const exists = await Bun.file(path).exists();
+async function checkMcpConfig(mcpConfigPath: string): Promise<CheckResult> {
+  const exists = await Bun.file(mcpConfigPath).exists();
   return {
     label: 'MCP config',
     ok: exists,
-    detail: exists ? `exists (${path})` : `not found (${path})`,
-    fix: exists ? undefined : `Re-register with --mcp flag`,
+    detail: exists ? `exists (${mcpConfigPath})` : `not found (${mcpConfigPath})`,
+    fix: exists ? undefined : `Check the --mcp-config path`,
   };
 }
 
-async function checkMcpAuth(name: string): Promise<CheckResult> {
-  const configPath = mcpConfigPath(name);
-  const exists = await Bun.file(configPath).exists();
+async function checkMcpAuth(name: string, mcpConfigPath: string): Promise<CheckResult> {
+  const exists = await Bun.file(mcpConfigPath).exists();
   if (!exists) {
     return {
       label: 'MCP auth',
       ok: false,
       detail: 'skipped (MCP config file missing)',
-      fix: `Re-register with --mcp flag`,
+      fix: `Check the --mcp-config path`,
     };
   }
 
   try {
     const result =
-      await Bun.$`claude -p 'test' --mcp-config ${configPath} --max-turns 1`
+      await Bun.$`claude -p 'test' --mcp-config ${mcpConfigPath} --max-turns 1`
         .quiet()
         .timeout(30_000);
     if (result.exitCode === 0) {

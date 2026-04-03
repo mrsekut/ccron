@@ -30,7 +30,7 @@ ccron add \
   --name daily-summary \
   --schedule "15 17 * * 1-5" \
   --prompt "日次サマリーを作成して #daily-summary チャンネルに投稿して" \
-  --mcp slack
+  --mcp-config ~/mcp.json
 
 # Verify setup
 ccron test daily-summary
@@ -66,10 +66,10 @@ Standard cron expression: `"minute hour * * day-of-week"`
 
 Step values (`*/5`) and minute/hour ranges are not supported (launchd limitation).
 
-## MCP Presets
+## MCP
 
-`slack`, `linear` are available as built-in presets.
+Pass your own MCP config JSON file via `--mcp-config`:
 
 ```bash
-ccron add --name my-task --schedule "0 9 * * *" --prompt "hello" --mcp slack,linear
+ccron add --name my-task --schedule "0 9 * * *" --prompt "hello" --mcp-config ~/mcp.json
 ```

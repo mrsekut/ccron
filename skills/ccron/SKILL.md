@@ -16,24 +16,25 @@ Schedule `claude -p` on macOS via launchd. Handles all the tricky launchd setup 
 
 When a user asks to run something on a schedule:
 
-1. Register with `ccron add --prompt "<prompt text>"`
-2. Verify with `ccron test <name>`
+1. If MCP servers are needed, write the MCP config JSON file first
+2. Register with `ccron add --prompt "<prompt text>"`
+3. Verify with `ccron test <name>`
 
 **Always run `ccron <command> --help` to check the latest options.**
 
 ## Commands
 
-| Command               | Purpose                              |
-| --------------------- | ------------------------------------ |
-| `ccron add`           | Register a scheduled task            |
-| `ccron list`          | List tasks with launchd status       |
-| `ccron show <name>`   | Show detailed task info              |
-| `ccron run <name>`    | Manually trigger and tail log        |
-| `ccron test <name>`   | Run environment checks               |
-| `ccron log <name>`    | Show logs (`--follow` for tail)      |
-| `ccron auth <name>`   | Re-authenticate MCP servers          |
-| `ccron edit <name>`   | Edit config, regenerate and reload   |
-| `ccron remove <name>` | Remove task and logs                 |
+| Command               | Purpose                            |
+| --------------------- | ---------------------------------- |
+| `ccron add`           | Register a scheduled task          |
+| `ccron list`          | List tasks with launchd status     |
+| `ccron show <name>`   | Show detailed task info            |
+| `ccron run <name>`    | Manually trigger and tail log      |
+| `ccron test <name>`   | Run environment checks             |
+| `ccron log <name>`    | Show logs (`--follow` for tail)    |
+| `ccron auth <name>`   | Re-authenticate MCP servers        |
+| `ccron edit <name>`   | Edit config, regenerate and reload |
+| `ccron remove <name>` | Remove task and logs               |
 
 ## ccron add Options
 
@@ -41,8 +42,7 @@ When a user asks to run something on a schedule:
 --name <name>           Task name (lowercase, numbers, hyphens)
 --schedule "<cron>"     Cron expression: "minute hour * * day-of-week"
 --prompt "<text>"       Prompt string
---mcp <names>           MCP presets, comma-separated (slack, linear)
---allowed-tools <tools> Allowed tools (Bash,Read,Write,Edit,Glob,Grep)
+--mcp-config <path>     Path to MCP config JSON file
 ```
 
 ## Schedule (cron)
@@ -63,14 +63,23 @@ Format: `"minute hour * * day-of-week"` (5 fields)
 User: "Post a daily summary to Slack at 5pm on weekdays"
 
 ```bash
-# 1. Register
+# 1. Write MCP config
+cat > ~/.config/ccron/mcp-slack.json << 'EOF'
+{
+  "mcpServers": {
+    "slack": { "type": "http", "url": "https://mcp.slack.com/mcp" }
+  }
+}
+EOF
+
+# 2. Register
 ccron add \
   --name daily-summary \
   --schedule "0 17 * * 1-5" \
   --prompt "Create a daily summary and post it to #daily-summary channel. Include: completed tasks, tomorrow's plan, blockers." \
-  --mcp slack
+  --mcp-config ~/.config/ccron/mcp-slack.json
 
-# 2. Verify
+# 3. Verify
 ccron test daily-summary
 ```
 

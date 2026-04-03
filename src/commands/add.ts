@@ -27,7 +27,6 @@ type AddOptions = {
   promptFile: string | null;
   mcp: string[];
   allowedTools: string[];
-  maxTurns: number | null;
 };
 
 export async function addCommand(args: string[]): Promise<void> {
@@ -50,7 +49,6 @@ export async function addCommand(args: string[]): Promise<void> {
     promptFile: opts.promptFile,
     mcp: opts.mcp,
     allowedTools: opts.allowedTools,
-    maxTurns: opts.maxTurns,
     createdAt: now,
     updatedAt: now,
   };
@@ -102,7 +100,6 @@ function parseAddArgs(args: string[]): AddOptions {
       'prompt-file': { type: 'string' },
       mcp: { type: 'string' },
       'allowed-tools': { type: 'string' },
-      'max-turns': { type: 'string' },
       help: { type: 'boolean', short: 'h' },
     },
     strict: true,
@@ -122,7 +119,6 @@ function parseAddArgs(args: string[]): AddOptions {
     allowedTools: values['allowed-tools']
       ? values['allowed-tools'].split(',').filter(Boolean)
       : [],
-    maxTurns: values['max-turns'] ? Number(values['max-turns']) : null,
   };
 }
 
@@ -168,14 +164,6 @@ async function validateOptions(opts: AddOptions): Promise<void> {
   if (opts.mcp.length > 0) {
     const mcpError = validateMcpPresets(opts.mcp);
     if (mcpError) errors.push(mcpError);
-  }
-
-  // Max turns
-  if (
-    opts.maxTurns !== null &&
-    (!Number.isInteger(opts.maxTurns) || opts.maxTurns < 1)
-  ) {
-    errors.push('--max-turns must be a positive integer');
   }
 
   if (errors.length > 0) {
@@ -232,7 +220,6 @@ Required:
 Optional:
   --mcp <names>           MCP server presets, comma-separated (slack, linear)
   --allowed-tools <tools> Allowed tools, comma-separated (Bash,Read,Write,Edit,Glob,Grep)
-  --max-turns <n>         Maximum number of turns
 
 Schedule format (cron):
   "minute hour * * day-of-week"

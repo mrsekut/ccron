@@ -10,7 +10,6 @@ export type TaskConfig = {
   promptFile: string | null;
   mcp: string[];
   allowedTools: string[];
-  maxTurns: number | null;
   createdAt: string;
   updatedAt: string;
 };

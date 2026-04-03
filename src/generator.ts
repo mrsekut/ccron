@@ -58,10 +58,6 @@ export function generateScriptContent(
     claudeArgs.push(`  --allowedTools "${task.allowedTools.join(',')}"`);
   }
 
-  if (task.maxTurns !== null) {
-    claudeArgs.push(`  --max-turns ${task.maxTurns}`);
-  }
-
   lines.push(claudeArgs.join(' \\\n'));
   lines.push('');
 

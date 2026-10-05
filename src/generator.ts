@@ -31,7 +31,7 @@ export function generateScriptContent(
     '',
     `ulimit -n ${global.ulimit} 2>/dev/null || true`,
     '',
-    'cd /tmp',
+    `cd ${task.cwd ?? '/tmp'}`,
     '',
   ];
 
@@ -102,7 +102,7 @@ export function generatePlistContent(
         <string>${escapeXml(pathEntries)}</string>
     </dict>
     <key>WorkingDirectory</key>
-    <string>/tmp</string>
+    <string>${escapeXml(task.cwd ?? '/tmp')}</string>
     <key>StartCalendarInterval</key>
 ${calendarIntervalXml}
     <key>StandardOutPath</key>

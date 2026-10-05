@@ -50,6 +50,7 @@ Displays task configuration, launchd status, and file locations.`);
     `Schedule:   ${task.schedule}`,
     `Prompt:     ${promptDisplay}`,
     `MCP config: ${task.mcpConfig ?? '(none)'}`,
+    `Working dir: ${task.cwd ?? '/tmp (default)'}`,
     `Status:     ${statusStr}`,
     `Last exit:  ${exitStr}`,
     `Created:    ${formatDate(task.createdAt)}`,

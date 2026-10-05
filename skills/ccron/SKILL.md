@@ -43,7 +43,25 @@ When a user asks to run something on a schedule:
 --schedule "<cron>"     Cron expression: "minute hour * * day-of-week"
 --prompt "<text>"       Prompt string
 --mcp-config <path>     Path to MCP config JSON file
+--cwd <path>            Directory to run claude in (default: /tmp)
 ```
+
+## Working Directory
+
+**If the task touches files outside `/tmp`, pass `--cwd`.** Without it the run fails with a
+permission error, not a missing-file error — an absolute path in the prompt does not help.
+
+`claude` also reads its project context from the directory it starts in, so `--cwd` makes
+that project's `CLAUDE.md`, `.claude/skills/` and `.mcp.json` available to the task.
+
+Prefer putting the prompt in the project as a skill and keeping the task a one-liner:
+
+```bash
+ccron add --name member-watch --schedule "0 17 * * 1-5" \
+  --prompt "/member-watch を実行して" --cwd ~/src/myproject
+```
+
+The prompt stays under version control, and manual and scheduled runs share one definition.
 
 ## Schedule (cron)
 

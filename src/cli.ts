@@ -41,6 +41,7 @@ File locations:
 Examples:
   ccron add --name daily-summary --schedule "15 17 * * 1-5" --prompt "日次サマリーを作成して"
   ccron add --name weekly-review --schedule "0 22 * * 5" --prompt "週次レビュー" --mcp-config ~/mcp.json
+  ccron add --name member-watch --schedule "0 17 * * 1-5" --prompt "/member-watch を実行して" --cwd ~/src/myproject
   ccron list
   ccron show daily-summary
   ccron test daily-summary

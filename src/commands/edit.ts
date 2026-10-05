@@ -4,6 +4,7 @@ import {
   readGlobalConfig,
   scriptPath,
   plistPath,
+  validateCwd,
 } from '../config';
 import { parseSchedule } from '../schedule';
 import {
@@ -20,6 +21,7 @@ export async function editCommand(args: string[]): Promise<void> {
       schedule: { type: 'string' },
       prompt: { type: 'string' },
       'mcp-config': { type: 'string' },
+      cwd: { type: 'string' },
       help: { type: 'boolean', short: 'h' },
     },
     allowPositionals: true,
@@ -63,6 +65,24 @@ export async function editCommand(args: string[]): Promise<void> {
       process.exit(1);
     }
     task.mcpConfig = mcpPath || null;
+    changed = true;
+  }
+
+  if (values.cwd !== undefined) {
+    const cwd = values.cwd;
+    if (cwd) {
+      const cwdError = validateCwd(cwd);
+      if (cwdError) {
+        console.error(`Error: ${cwdError}`);
+        process.exit(1);
+      }
+      const { existsSync, statSync } = await import('fs');
+      if (!existsSync(cwd) || !statSync(cwd).isDirectory()) {
+        console.error(`Working directory not found: ${cwd}`);
+        process.exit(1);
+      }
+    }
+    task.cwd = cwd || null;
     changed = true;
   }
 
@@ -110,6 +130,7 @@ Options:
   --schedule <cron>       Update cron expression
   --prompt <text>         Update prompt
   --mcp-config <path>     Update MCP config file path (pass "" to remove)
+  --cwd <path>            Update the directory claude runs in (pass "" to reset to /tmp)
 
 Examples:
   ccron edit daily-summary --schedule "0 18 * * 1-5"

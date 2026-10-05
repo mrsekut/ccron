@@ -8,6 +8,7 @@ export type TaskConfig = {
   schedule: string;
   prompt: string | null;
   mcpConfig: string | null;
+  cwd: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -122,6 +123,11 @@ function defaultGlobalConfig(): GlobalConfig {
 // --- Validation (pure) ---
 
 const TASK_NAME_RE = /^[a-z0-9][a-z0-9-]*$/;
+
+export function validateCwd(cwd: string): string | null {
+  if (!cwd.startsWith('/')) return 'Working directory must be an absolute path';
+  return null;
+}
 
 export function validateTaskName(name: string): string | null {
   if (!name) return 'Task name is required';

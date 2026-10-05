@@ -18,6 +18,7 @@ function makeTask(overrides: Partial<TaskConfig> = {}): TaskConfig {
     schedule: '0 9 * * *',
     prompt: 'Hello world',
     mcpConfig: null,
+    cwd: null,
     createdAt: '2026-04-02T00:00:00Z',
     updatedAt: '2026-04-02T00:00:00Z',
     ...overrides,
@@ -35,6 +36,15 @@ describe('generateScriptContent', () => {
     expect(script).toContain('cd /tmp');
     expect(script).toContain("PROMPT='Hello world'");
     expect(script).toContain('claude -p "$PROMPT"');
+  });
+
+  test('cwd replaces the default /tmp', () => {
+    const script = generateScriptContent(
+      makeTask({ cwd: '/Users/test/src/myproject' }),
+      baseGlobal,
+    );
+    expect(script).toContain('cd /Users/test/src/myproject');
+    expect(script).not.toContain('cd /tmp');
   });
 
   test('prompt with single quotes is escaped', () => {
@@ -71,6 +81,17 @@ describe('generatePlistContent', () => {
     expect(plist).toContain('ccron-test-task.sh');
     expect(plist).toContain('<key>WorkingDirectory</key>');
     expect(plist).toContain('<string>/tmp</string>');
+  });
+
+  test('cwd sets WorkingDirectory', () => {
+    const plist = generatePlistContent(
+      makeTask({ cwd: '/Users/test/src/myproject' }),
+      baseGlobal,
+      dailyIntervals,
+    );
+    expect(plist).toContain(
+      '<key>WorkingDirectory</key>\n    <string>/Users/test/src/myproject</string>',
+    );
   });
 
   test('single calendar interval (no array wrapper)', () => {

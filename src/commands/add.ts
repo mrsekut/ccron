@@ -2,6 +2,7 @@ import {
   type TaskConfig,
   type GlobalConfig,
   validateTaskName,
+  validateCwd,
   readTaskConfig,
   writeTaskConfig,
   readGlobalConfig,
@@ -22,6 +23,7 @@ type AddOptions = {
   schedule: string;
   prompt: string | null;
   mcpConfig: string | null;
+  cwd: string | null;
 };
 
 export async function addCommand(args: string[]): Promise<void> {
@@ -42,6 +44,7 @@ export async function addCommand(args: string[]): Promise<void> {
     schedule: opts.schedule,
     prompt: opts.prompt,
     mcpConfig: opts.mcpConfig,
+    cwd: opts.cwd,
     createdAt: now,
     updatedAt: now,
   };
@@ -84,6 +87,7 @@ function parseAddArgs(args: string[]): AddOptions {
       schedule: { type: 'string' },
       prompt: { type: 'string' },
       'mcp-config': { type: 'string' },
+      cwd: { type: 'string' },
       help: { type: 'boolean', short: 'h' },
     },
     strict: true,
@@ -99,6 +103,7 @@ function parseAddArgs(args: string[]): AddOptions {
     schedule: values.schedule ?? '',
     prompt: values.prompt ?? null,
     mcpConfig: values['mcp-config'] ?? null,
+    cwd: values.cwd ?? null,
   };
 }
 
@@ -129,6 +134,18 @@ async function validateOptions(opts: AddOptions): Promise<void> {
   // Prompt
   if (!opts.prompt) {
     errors.push('--prompt is required');
+  }
+
+  // Working directory
+  if (opts.cwd) {
+    const cwdError = validateCwd(opts.cwd);
+    if (cwdError) errors.push(cwdError);
+    else {
+      const { existsSync, statSync } = await import('fs');
+      if (!existsSync(opts.cwd) || !statSync(opts.cwd).isDirectory()) {
+        errors.push(`Working directory not found: ${opts.cwd}`);
+      }
+    }
   }
 
   // MCP config file
@@ -191,6 +208,10 @@ Required:
 
 Optional:
   --mcp-config <path>     Path to MCP config JSON file
+  --cwd <path>            Directory to run claude in (default: /tmp)
+                          Set this to a project directory so the task can read
+                          its files and pick up its CLAUDE.md, .claude/skills
+                          and .mcp.json
 
 Schedule format (cron):
   "minute hour * * day-of-week"

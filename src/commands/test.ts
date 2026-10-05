@@ -25,7 +25,7 @@ Checks:
   2. claude auth status (logged in)
   3. ulimit -n (file descriptors)
   4. Script file exists
-  5. Script path is outside TCC-protected directories
+  5. Script path (and cwd, if set) is outside TCC-protected directories
   6. Plist registered in launchd
   7. MCP config exists (if task uses MCP)
   8. MCP auth (if task uses MCP) — runs claude CLI to verify OAuth tokens
@@ -58,6 +58,7 @@ Example:
   checks.push(await checkUlimit());
   checks.push(await checkScriptExists(name));
   checks.push(checkScriptTccSafe(name));
+  if (task.cwd) checks.push(checkCwdTccSafe(task.cwd));
   checks.push(await checkPlistRegistered(name));
 
   if (task.mcpConfig) {
@@ -175,11 +176,32 @@ async function checkScriptExists(name: string): Promise<CheckResult> {
   };
 }
 
+const TCC_DIRS = ['Desktop', 'Documents', 'Downloads'];
+
+function tccProtects(path: string): boolean {
+  const home = homedir();
+  return TCC_DIRS.some(dir => path.startsWith(`${home}/${dir}`));
+}
+
+function checkCwdTccSafe(cwd: string): CheckResult {
+  const inTcc = tccProtects(cwd);
+  return {
+    label: 'TCC protection (cwd)',
+    ok: !inTcc,
+    detail: inTcc
+      ? `cwd is in a TCC-protected directory (${cwd})`
+      : `cwd is outside TCC-protected directories`,
+    // Granting Full Disk Access to /bin/bash is not enough: the claude process
+    // gets its own TCC identity and still fails with EPERM on these paths.
+    fix: inTcc
+      ? 'Move the project outside ~/Desktop, ~/Documents, ~/Downloads, or grant Full Disk Access to the claude binary'
+      : undefined,
+  };
+}
+
 function checkScriptTccSafe(name: string): CheckResult {
   const path = scriptPath(name);
-  const home = homedir();
-  const tccDirs = [`${home}/Desktop`, `${home}/Documents`, `${home}/Downloads`];
-  const inTcc = tccDirs.some(dir => path.startsWith(dir));
+  const inTcc = tccProtects(path);
   return {
     label: 'TCC protection',
     ok: !inTcc,

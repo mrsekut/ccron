@@ -59,6 +59,11 @@ export function generateScriptContent(
 
 /**
  * Generate the launchd plist XML content.
+ *
+ * WorkingDirectory stays /tmp even when the task sets `cwd`. launchd performs the
+ * chdir itself, and that chdir is denied for TCC-protected locations (~/Desktop,
+ * ~/Documents, ...), which fails the job before the script runs. The script's own
+ * `cd` handles `cwd` instead.
  */
 export function generatePlistContent(
   task: TaskConfig,
@@ -102,7 +107,7 @@ export function generatePlistContent(
         <string>${escapeXml(pathEntries)}</string>
     </dict>
     <key>WorkingDirectory</key>
-    <string>${escapeXml(task.cwd ?? '/tmp')}</string>
+    <string>/tmp</string>
     <key>StartCalendarInterval</key>
 ${calendarIntervalXml}
     <key>StandardOutPath</key>

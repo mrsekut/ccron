@@ -83,15 +83,18 @@ describe('generatePlistContent', () => {
     expect(plist).toContain('<string>/tmp</string>');
   });
 
-  test('cwd sets WorkingDirectory', () => {
+  test('WorkingDirectory stays /tmp even when cwd is set', () => {
+    // launchd does this chdir itself, and it is denied under TCC-protected paths.
+    // The script's own `cd` is what honors cwd.
     const plist = generatePlistContent(
       makeTask({ cwd: '/Users/test/src/myproject' }),
       baseGlobal,
       dailyIntervals,
     );
     expect(plist).toContain(
-      '<key>WorkingDirectory</key>\n    <string>/Users/test/src/myproject</string>',
+      '<key>WorkingDirectory</key>\n    <string>/tmp</string>',
     );
+    expect(plist).not.toContain('/Users/test/src/myproject');
   });
 
   test('single calendar interval (no array wrapper)', () => {

@@ -123,10 +123,15 @@ export type ActualState = ActualJob[];
 
 // --- Plan ---
 
+/** The generated files for a job, exactly as they will be written. */
+export type Rendered = { script: string; plist: string };
+
+// Writing actions carry what plan() compared against, so execute() writes
+// exactly what was judged to be needed.
 export type Action =
-  | { kind: 'create'; job: Job }
-  | { kind: 'update'; job: Job }
-  | { kind: 'adopt'; job: Job }
+  | { kind: 'create'; job: Job; rendered: Rendered }
+  | { kind: 'update'; job: Job; rendered: Rendered }
+  | { kind: 'adopt'; job: Job; rendered: Rendered }
   | { kind: 'delete'; name: JobName }
   | { kind: 'noop'; name: JobName };
 

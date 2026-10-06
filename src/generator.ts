@@ -1,4 +1,4 @@
-import type { Job, ManifestId } from './domain';
+import type { Job, ManifestId, Rendered } from './domain';
 import type { Paths } from './paths';
 import { logPath, plistLabel, scriptPath } from './paths';
 import type { CalendarInterval } from './schedule';
@@ -16,8 +16,6 @@ export type RenderEnv = {
 export const MANIFEST_ENV = 'CCRON_MANIFEST';
 
 const ULIMIT = 2147483646;
-
-export type Rendered = { script: string; plist: string };
 
 export function render(job: Job, env: RenderEnv): Rendered {
   return {

@@ -1,15 +1,15 @@
-import { readTaskConfig, logPath } from '../config';
+import { logPath, plistPath } from '../config';
 import { kickstart } from '../launchd';
 import { spawn } from 'child_process';
 
 export async function runCommand(args: string[]): Promise<void> {
   if (args.includes('--help') || args.includes('-h')) {
-    console.log(`ccron run - Manually trigger a task
+    console.log(`ccron run - Manually trigger a job
 
 Usage: ccron run <name>
 
-Kicks start the task via launchctl and tails the log file in real-time.
-Press Ctrl+C to stop following the log (the task continues running).
+Kicks start the job via launchctl and tails the log file in real-time.
+Press Ctrl+C to stop following the log (the job continues running).
 
 Example:
   ccron run daily-summary`);
@@ -22,9 +22,8 @@ Example:
     process.exit(1);
   }
 
-  const task = await readTaskConfig(name);
-  if (!task) {
-    console.error(`Task "${name}" not found.`);
+  if (!(await Bun.file(plistPath(name)).exists())) {
+    console.error(`Job "${name}" not found.`);
     process.exit(1);
   }
 

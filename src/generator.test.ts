@@ -19,8 +19,6 @@ function makeTask(overrides: Partial<TaskConfig> = {}): TaskConfig {
     prompt: 'Hello world',
     mcpConfig: null,
     cwd: null,
-    createdAt: '2026-04-02T00:00:00Z',
-    updatedAt: '2026-04-02T00:00:00Z',
     ...overrides,
   };
 }

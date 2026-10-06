@@ -6,49 +6,15 @@ const command = args[0];
 function printHelp() {
   console.log(`ccron - Schedule claude -p execution on macOS with launchd
 
-Schedule claude -p execution on macOS via launchd.
-Handles all the tricky launchd setup automatically.
-
 Usage: ccron <command> [options]
 
 Commands:
-  add       Register a new scheduled task
-  list      List all registered tasks with launchd status
-  show      Show detailed information about a task
-  run       Manually trigger a task and tail its log
-  test      Run environment checks (CLI, auth, ulimit, TCC, plist)
-  log       Show task execution logs
-  auth      Re-authenticate MCP servers for a task
-  edit      Edit a task's configuration (regenerates script/plist)
-  remove    Remove a task and all generated files
-
-Schedule format (cron expression):
-  "minute hour * * day-of-week"
-
-  15 17 * * *     Every day at 17:15
-  15 17 * * 1-5   Weekdays at 17:15
-  0 22 * * 5      Every Friday at 22:00
-  0 9 * * 1,3,5   Mon/Wed/Fri at 9:00
-
-  Note: Step values (*/5) and minute/hour ranges are not supported (launchd limitation).
+  run       Manually trigger a job and tail its log
 
 File locations:
-  Task configs:  ~/.config/ccron/tasks/<name>.json
   Scripts:       ~/.local/bin/ccron-<name>.sh
   Plists:        ~/Library/LaunchAgents/com.ccron.<name>.plist
   Logs:          ~/.local/share/ccron/logs/<name>.log
-
-Examples:
-  ccron add --name daily-summary --schedule "15 17 * * 1-5" --prompt "日次サマリーを作成して"
-  ccron add --name weekly-review --schedule "0 22 * * 5" --prompt "週次レビュー" --mcp-config ~/mcp.json
-  ccron add --name member-watch --schedule "0 17 * * 1-5" --prompt "/member-watch を実行して" --cwd ~/src/myproject
-  ccron list
-  ccron show daily-summary
-  ccron test daily-summary
-  ccron edit daily-summary --schedule "0 18 * * 1-5"
-  ccron run daily-summary
-  ccron log daily-summary --follow
-  ccron remove daily-summary
 
 Run "ccron <command> --help" for detailed help on each command.`);
 }
@@ -58,26 +24,10 @@ if (!command || command === '--help' || command === '-h') {
   process.exit(0);
 }
 
-import { addCommand } from './commands/add';
-import { listCommand } from './commands/list';
 import { runCommand } from './commands/run';
-import { logCommand } from './commands/log';
-import { testCommand } from './commands/test';
-import { removeCommand } from './commands/remove';
-import { editCommand } from './commands/edit';
-import { authCommand } from './commands/auth';
-import { showCommand } from './commands/show';
 
 const commands: Record<string, (args: string[]) => Promise<void>> = {
-  add: addCommand,
-  list: listCommand,
-  show: showCommand,
   run: runCommand,
-  log: logCommand,
-  test: testCommand,
-  remove: removeCommand,
-  edit: editCommand,
-  auth: authCommand,
 };
 
 const handler = commands[command];

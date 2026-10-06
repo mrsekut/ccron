@@ -59,3 +59,18 @@ export async function listOne(name: string): Promise<LaunchdStatus | null> {
 
   return { pid, lastExitStatus };
 }
+
+/** launchctl operations, injectable so tests can swap in a fake. */
+export type Launchd = {
+  bootstrap: (plistPath: string) => Promise<void>;
+  bootout: (name: string) => Promise<void>;
+  kickstart: (name: string) => Promise<void>;
+  status: (name: string) => Promise<LaunchdStatus | null>;
+};
+
+export const systemLaunchd: Launchd = {
+  bootstrap,
+  bootout,
+  kickstart,
+  status: listOne,
+};

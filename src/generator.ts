@@ -1,13 +1,27 @@
-import type { TaskConfig, GlobalConfig } from './config';
 import type { CalendarInterval } from './schedule';
-import { logPath, plistLabel, scriptPath } from './config';
+import type { Paths } from './paths';
+import { logPath, plistLabel, scriptPath } from './paths';
 import { homedir } from 'os';
+
+// Transitional shapes; replaced by the validated domain types later.
+export type JobConfig = {
+  name: string;
+  prompt: string | null;
+  mcpConfig: string | null;
+  cwd: string | null;
+};
+
+export type GlobalConfig = {
+  claudePath: string;
+  extraPaths: string[];
+  ulimit: number;
+};
 
 /**
  * Generate the shell script content that launchd will execute.
  */
 export function generateScriptContent(
-  task: TaskConfig,
+  job: JobConfig,
   global: GlobalConfig,
 ): string {
   const home = homedir();
@@ -31,14 +45,14 @@ export function generateScriptContent(
     '',
     `ulimit -n ${global.ulimit} 2>/dev/null || true`,
     '',
-    `cd ${task.cwd ?? '/tmp'}`,
+    `cd ${job.cwd ?? '/tmp'}`,
     '',
   ];
 
   // Prompt handling
-  if (task.prompt) {
+  if (job.prompt) {
     // Escape single quotes for bash
-    const escaped = task.prompt.replace(/'/g, "'\\''");
+    const escaped = job.prompt.replace(/'/g, "'\\''");
     lines.push(`PROMPT='${escaped}'`);
   }
 
@@ -47,8 +61,8 @@ export function generateScriptContent(
   // Build claude command
   const claudeArgs: string[] = ['claude -p "$PROMPT"'];
 
-  if (task.mcpConfig) {
-    claudeArgs.push(`  --mcp-config "${task.mcpConfig}"`);
+  if (job.mcpConfig) {
+    claudeArgs.push(`  --mcp-config "${job.mcpConfig}"`);
   }
 
   lines.push(claudeArgs.join(' \\\n'));
@@ -60,15 +74,16 @@ export function generateScriptContent(
 /**
  * Generate the launchd plist XML content.
  *
- * WorkingDirectory stays /tmp even when the task sets `cwd`. launchd performs the
+ * WorkingDirectory stays /tmp even when the job sets `cwd`. launchd performs the
  * chdir itself, and that chdir is denied for TCC-protected locations (~/Desktop,
  * ~/Documents, ...), which fails the job before the script runs. The script's own
  * `cd` handles `cwd` instead.
  */
 export function generatePlistContent(
-  task: TaskConfig,
+  job: JobConfig,
   global: GlobalConfig,
   intervals: CalendarInterval[],
+  paths: Paths,
 ): string {
   const home = homedir();
   const pathEntries = [
@@ -81,9 +96,9 @@ export function generatePlistContent(
     .filter(Boolean)
     .join(':');
 
-  const label = plistLabel(task.name);
-  const script = scriptPath(task.name);
-  const log = logPath(task.name);
+  const label = plistLabel(job.name);
+  const script = scriptPath(paths, job.name);
+  const log = logPath(paths, job.name);
 
   const calendarIntervalXml = generateCalendarIntervalXml(intervals);
 
@@ -154,4 +169,3 @@ function escapeXml(str: string): string {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&apos;');
 }
-

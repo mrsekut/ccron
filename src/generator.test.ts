@@ -1,10 +1,10 @@
 import { test, expect, describe } from 'bun:test';
-import {
-  generateScriptContent,
-  generatePlistContent,
-} from './generator';
-import type { TaskConfig, GlobalConfig } from './config';
+import { generateScriptContent, generatePlistContent } from './generator';
+import type { JobConfig, GlobalConfig } from './generator';
 import type { CalendarInterval } from './schedule';
+import { defaultPaths } from './paths';
+
+const paths = defaultPaths('/Users/test');
 
 const baseGlobal: GlobalConfig = {
   claudePath: '/Users/test/.nix-profile/bin',
@@ -12,10 +12,9 @@ const baseGlobal: GlobalConfig = {
   ulimit: 2147483646,
 };
 
-function makeTask(overrides: Partial<TaskConfig> = {}): TaskConfig {
+function makeJob(overrides: Partial<JobConfig> = {}): JobConfig {
   return {
-    name: 'test-task',
-    schedule: '0 9 * * *',
+    name: 'test-job',
     prompt: 'Hello world',
     mcpConfig: null,
     cwd: null,
@@ -25,7 +24,7 @@ function makeTask(overrides: Partial<TaskConfig> = {}): TaskConfig {
 
 describe('generateScriptContent', () => {
   test('basic script with inline prompt', () => {
-    const script = generateScriptContent(makeTask(), baseGlobal);
+    const script = generateScriptContent(makeJob(), baseGlobal);
     expect(script).toContain('#!/usr/bin/env bash');
     expect(script).toContain('set -uo pipefail');
     expect(script).toContain('export HOME=');
@@ -38,7 +37,7 @@ describe('generateScriptContent', () => {
 
   test('cwd replaces the default /tmp', () => {
     const script = generateScriptContent(
-      makeTask({ cwd: '/Users/test/src/myproject' }),
+      makeJob({ cwd: '/Users/test/src/myproject' }),
       baseGlobal,
     );
     expect(script).toContain('cd /Users/test/src/myproject');
@@ -47,7 +46,7 @@ describe('generateScriptContent', () => {
 
   test('prompt with single quotes is escaped', () => {
     const script = generateScriptContent(
-      makeTask({ prompt: "it's a test" }),
+      makeJob({ prompt: "it's a test" }),
       baseGlobal,
     );
     expect(script).toContain("PROMPT='it'\\''s a test'");
@@ -55,14 +54,14 @@ describe('generateScriptContent', () => {
 
   test('mcp-config flag is included', () => {
     const script = generateScriptContent(
-      makeTask({ mcpConfig: '/path/to/mcp.json' }),
+      makeJob({ mcpConfig: '/path/to/mcp.json' }),
       baseGlobal,
     );
     expect(script).toContain('--mcp-config "/path/to/mcp.json"');
   });
 
   test('no mcp-config flag when null', () => {
-    const script = generateScriptContent(makeTask(), baseGlobal);
+    const script = generateScriptContent(makeJob(), baseGlobal);
     expect(script).not.toContain('--mcp-config');
   });
 });
@@ -71,12 +70,17 @@ describe('generatePlistContent', () => {
   const dailyIntervals: CalendarInterval[] = [{ Hour: 9, Minute: 0 }];
 
   test('basic plist structure', () => {
-    const plist = generatePlistContent(makeTask(), baseGlobal, dailyIntervals);
+    const plist = generatePlistContent(
+      makeJob(),
+      baseGlobal,
+      dailyIntervals,
+      paths,
+    );
     expect(plist).toContain('<?xml version="1.0"');
     expect(plist).toContain('<key>Label</key>');
-    expect(plist).toContain('com.ccron.test-task');
+    expect(plist).toContain('com.ccron.test-job');
     expect(plist).toContain('/bin/bash');
-    expect(plist).toContain('ccron-test-task.sh');
+    expect(plist).toContain('ccron-test-job.sh');
     expect(plist).toContain('<key>WorkingDirectory</key>');
     expect(plist).toContain('<string>/tmp</string>');
   });
@@ -85,9 +89,10 @@ describe('generatePlistContent', () => {
     // launchd does this chdir itself, and it is denied under TCC-protected paths.
     // The script's own `cd` is what honors cwd.
     const plist = generatePlistContent(
-      makeTask({ cwd: '/Users/test/src/myproject' }),
+      makeJob({ cwd: '/Users/test/src/myproject' }),
       baseGlobal,
       dailyIntervals,
+      paths,
     );
     expect(plist).toContain(
       '<key>WorkingDirectory</key>\n    <string>/tmp</string>',
@@ -96,7 +101,12 @@ describe('generatePlistContent', () => {
   });
 
   test('single calendar interval (no array wrapper)', () => {
-    const plist = generatePlistContent(makeTask(), baseGlobal, dailyIntervals);
+    const plist = generatePlistContent(
+      makeJob(),
+      baseGlobal,
+      dailyIntervals,
+      paths,
+    );
     expect(plist).toContain('<key>Hour</key>');
     expect(plist).toContain('<integer>9</integer>');
     expect(plist).toContain('<key>Minute</key>');
@@ -112,9 +122,10 @@ describe('generatePlistContent', () => {
       { Hour: 17, Minute: 15, Weekday: 2 },
     ];
     const plist = generatePlistContent(
-      makeTask(),
+      makeJob(),
       baseGlobal,
       weekdayIntervals,
+      paths,
     );
     const calSection = plist.split('StartCalendarInterval')[1]!;
     expect(calSection).toContain('<array>');
@@ -122,9 +133,14 @@ describe('generatePlistContent', () => {
   });
 
   test('log paths are set', () => {
-    const plist = generatePlistContent(makeTask(), baseGlobal, dailyIntervals);
+    const plist = generatePlistContent(
+      makeJob(),
+      baseGlobal,
+      dailyIntervals,
+      paths,
+    );
     expect(plist).toContain('StandardOutPath');
     expect(plist).toContain('StandardErrorPath');
-    expect(plist).toContain('ccron/logs/test-task.log');
+    expect(plist).toContain('ccron/logs/test-job.log');
   });
 });

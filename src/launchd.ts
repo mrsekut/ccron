@@ -1,4 +1,4 @@
-import { plistLabel } from './config';
+import { plistLabel } from './paths';
 
 export async function bootstrap(plistPath: string): Promise<void> {
   const uid = process.getuid?.() ?? 501;

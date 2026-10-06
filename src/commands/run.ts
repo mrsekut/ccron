@@ -1,4 +1,4 @@
-import { logPath, plistPath } from '../config';
+import { defaultPaths, logPath, plistPath } from '../paths';
 import { kickstart } from '../launchd';
 import { spawn } from 'child_process';
 
@@ -22,12 +22,13 @@ Example:
     process.exit(1);
   }
 
-  if (!(await Bun.file(plistPath(name)).exists())) {
+  const paths = defaultPaths();
+  if (!(await Bun.file(plistPath(paths, name)).exists())) {
     console.error(`Job "${name}" not found.`);
     process.exit(1);
   }
 
-  const log = logPath(name);
+  const log = logPath(paths, name);
 
   // Ensure log file exists for tail
   await Bun.write(

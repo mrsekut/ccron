@@ -2,8 +2,9 @@ import { plistLabel } from './paths';
 
 export async function bootstrap(plistPath: string): Promise<void> {
   const uid = process.getuid?.() ?? 501;
-  const result =
-    await Bun.$`launchctl bootstrap gui/${uid} ${plistPath}`.quiet();
+  const result = await Bun.$`launchctl bootstrap gui/${uid} ${plistPath}`
+    .quiet()
+    .nothrow();
   if (result.exitCode !== 0) {
     const stderr = result.stderr.toString().trim();
     // Already bootstrapped is not an error
@@ -15,10 +16,14 @@ export async function bootstrap(plistPath: string): Promise<void> {
 export async function bootout(name: string): Promise<void> {
   const uid = process.getuid?.() ?? 501;
   const label = plistLabel(name);
-  const result = await Bun.$`launchctl bootout gui/${uid}/${label}`.quiet();
+  const result = await Bun.$`launchctl bootout gui/${uid}/${label}`
+    .quiet()
+    .nothrow();
   if (result.exitCode !== 0) {
     const stderr = result.stderr.toString().trim();
-    // Not found is not an error during removal
+    // Not loaded is not an error: bootout is also used before (re)loading.
+    // launchctl reports it as "Boot-out failed: 3: No such process".
+    if (stderr.includes('No such process')) return;
     if (stderr.includes('Could not find service')) return;
     throw new Error(`launchctl bootout failed: ${stderr}`);
   }
@@ -27,7 +32,9 @@ export async function bootout(name: string): Promise<void> {
 export async function kickstart(name: string): Promise<void> {
   const uid = process.getuid?.() ?? 501;
   const label = plistLabel(name);
-  const result = await Bun.$`launchctl kickstart gui/${uid}/${label}`.quiet();
+  const result = await Bun.$`launchctl kickstart gui/${uid}/${label}`
+    .quiet()
+    .nothrow();
   if (result.exitCode !== 0) {
     throw new Error(
       `launchctl kickstart failed: ${result.stderr.toString().trim()}`,
@@ -42,7 +49,7 @@ export type LaunchdStatus = {
 
 export async function listOne(name: string): Promise<LaunchdStatus | null> {
   const label = plistLabel(name);
-  const result = await Bun.$`launchctl list ${label}`.quiet();
+  const result = await Bun.$`launchctl list ${label}`.quiet().nothrow();
   if (result.exitCode !== 0) return null;
 
   const output = result.stdout.toString();

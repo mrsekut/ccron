@@ -78,3 +78,8 @@
 
 - manifest を別の場所へ移すと、旧パスのジョブは孤児になり、移動後の `apply` で同名の衝突になる。今は `status` に出る削除コマンドで手で消す。頻繁に起きるなら引き取りの仕組み（`--adopt` など）を考える。
 - 一度も実行されていないジョブも `launchctl list` では `LastExitStatus = 0` になるので、`status` に「last exit 0」と出る。
+
+## 移行で分かったこと（2026-10-07、仕事用 PC）
+
+- 0.3.1 で登録した 2 つのタスクは、同名で宣言すると期待どおり `adopt` になった。`apply` 後は `in sync`・`loaded`。
+- `status` が所有者なしのジョブに出す削除コマンドは、スクリプトの場所を `~/.local/bin/ccron-<name>.sh` と決め打ちしている。手で作った plist（`com.ccron.dbgmw`、実体は `/tmp/dbg-mw.sh`）では実在しないパスを指す。`rm -f` なので害はないが、本来のスクリプトは残る。直すなら plist の `ProgramArguments` から読む。

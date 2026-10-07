@@ -2,66 +2,56 @@
 name: ccron
 description: >
   Schedule claude -p execution on macOS with launchd. Use when the user wants to
-  set up recurring claude tasks, manage scheduled prompts, or automate claude CLI runs.
-allowed-tools: 'Read,Write,Bash(ccron:*)'
-version: '0.1.0'
+  set up, change or remove recurring claude jobs, check whether they ran, or run one now.
+allowed-tools: 'Read,Write,Edit,Bash(ccron:*),Bash(bunx @mrsekut/ccron:*)'
+version: '1.0.0'
 author: 'mrsekut'
 ---
 
 # ccron - Schedule claude -p on macOS with launchd
 
-Schedule `claude -p` on macOS via launchd. Handles all the tricky launchd setup automatically.
+Jobs are declared in a `ccron.json` in the user's project. `ccron apply` makes launchd match it. Never edit the generated scripts or plists directly.
 
 ## Workflow
 
-When a user asks to run something on a schedule:
+1. Find the project's `ccron.json`. If there is none, create one (e.g. `<project>/ccron/ccron.json`).
+2. Edit `ccron.json`: add, change or remove a job.
+3. `ccron apply <ccron.json> --dry-run` and show the plan to the user.
+4. After the user agrees, `ccron apply <ccron.json>`.
+5. `ccron status <ccron.json>` to confirm every job is `in sync`.
 
-1. If MCP servers are needed, write the MCP config JSON file first
-2. Register with `ccron add --prompt "<prompt text>"`
-3. Verify with `ccron test <name>`
+Run `ccron <command> --help` for the latest options.
 
-**Always run `ccron <command> --help` to check the latest options.**
+## ccron.json
+
+```json
+{
+  "jobs": {
+    "member-watch": {
+      "schedule": "0 17 * * 1-5",
+      "prompt": "member-watch スキルを実行して",
+      "cwd": "..",
+      "mcpConfig": "mcp/slack.json"
+    }
+  }
+}
+```
+
+- `schedule`, `prompt`, `cwd` are required. `mcpConfig` is optional. Other keys are errors.
+- `cwd` and `mcpConfig` are relative to the directory of `ccron.json`.
+- `cwd` must be a project directory outside `~/Desktop`, `~/Documents`, `~/Downloads` (TCC).
+- **Keep `prompt` a one-liner that invokes a skill in the project.** Put the instructions in the skill, not in `ccron.json`.
+- MCP config files contain only server URLs. Do not put tokens in them if the project is a git repository.
 
 ## Commands
 
-| Command               | Purpose                            |
-| --------------------- | ---------------------------------- |
-| `ccron add`           | Register a scheduled task          |
-| `ccron list`          | List tasks with launchd status     |
-| `ccron show <name>`   | Show detailed task info            |
-| `ccron run <name>`    | Manually trigger and tail log      |
-| `ccron test <name>`   | Run environment checks             |
-| `ccron log <name>`    | Show logs (`--follow` for tail)    |
-| `ccron auth <name>`   | Re-authenticate MCP servers        |
-| `ccron edit <name>`   | Edit config, regenerate and reload |
-| `ccron remove <name>` | Remove task and logs               |
+| Command                                | Purpose                                                       |
+| -------------------------------------- | ------------------------------------------------------------- |
+| `ccron apply <ccron.json> [--dry-run]` | Make launchd match the manifest                               |
+| `ccron status <ccron.json>`            | Sync state, launchd status, last exit, log path; other jobs   |
+| `ccron run <name>`                     | Run a job now and tail its log (Ctrl+C stops tailing only)    |
 
-## ccron add Options
-
-```
---name <name>           Task name (lowercase, numbers, hyphens)
---schedule "<cron>"     Cron expression: "minute hour * * day-of-week"
---prompt "<text>"       Prompt string
---mcp-config <path>     Path to MCP config JSON file
---cwd <path>            Directory to run claude in (default: /tmp)
-```
-
-## Working Directory
-
-**If the task touches files outside `/tmp`, pass `--cwd`.** Without it the run fails with a
-permission error, not a missing-file error — an absolute path in the prompt does not help.
-
-`claude` also reads its project context from the directory it starts in, so `--cwd` makes
-that project's `CLAUDE.md`, `.claude/skills/` and `.mcp.json` available to the task.
-
-Prefer putting the prompt in the project as a skill and keeping the task a one-liner:
-
-```bash
-ccron add --name member-watch --schedule "0 17 * * 1-5" \
-  --prompt "/member-watch を実行して" --cwd ~/src/myproject
-```
-
-The prompt stays under version control, and manual and scheduled runs share one definition.
+`ccron run` really executes the job: it reads external services and writes files. Ask the user before running it.
 
 ## Schedule (cron)
 
@@ -74,36 +64,11 @@ Format: `"minute hour * * day-of-week"` (5 fields)
 | Every Friday at 22:00 | `"0 22 * * 5"`    |
 | Mon/Wed/Fri at 9:00   | `"0 9 * * 1,3,5"` |
 
-**Constraint**: Step values (`*/5`) and minute/hour ranges are not supported (launchd limitation).
-
-## Example
-
-User: "Post a daily summary to Slack at 5pm on weekdays"
-
-```bash
-# 1. Write MCP config
-cat > ~/.config/ccron/mcp-slack.json << 'EOF'
-{
-  "mcpServers": {
-    "slack": { "type": "http", "url": "https://mcp.slack.com/mcp" }
-  }
-}
-EOF
-
-# 2. Register
-ccron add \
-  --name daily-summary \
-  --schedule "0 17 * * 1-5" \
-  --prompt "Create a daily summary and post it to #daily-summary channel. Include: completed tasks, tomorrow's plan, blockers." \
-  --mcp-config ~/.config/ccron/mcp-slack.json
-
-# 3. Verify
-ccron test daily-summary
-```
+Step values (`*/5`) and minute/hour ranges are not supported (launchd limitation).
 
 ## Troubleshooting
 
-- `ccron test` fails: follow the suggested fix commands in the output
-- MCP auth expired: `ccron auth <name>`
-- Prompt change: `ccron edit <name> --prompt "<new prompt>"`
-- Schedule change: `ccron edit <name> --schedule "<cron>"`
+- Did it run? `ccron status <ccron.json>` shows the last exit and the log path; read the end of the log. A job that never ran also shows `last exit 0`.
+- `apply` reports a conflict: another manifest owns that job name. Rename the job or remove it from the other manifest.
+- `status` lists an unowned or orphaned job: it is not managed by this manifest. Ask the user before running the printed remove command.
+- MCP auth expired: the user runs `claude --mcp-config <path>` interactively and signs in again.

@@ -2,7 +2,7 @@
 
 Schedule `claude -p` execution on macOS with launchd.
 
-Register scheduled `claude -p` tasks with a single command. Handles all the tricky launchd setup automatically.
+Declare jobs in a `ccron.json` inside your project, and `ccron apply` makes launchd match it. The project repository is the single place that tells you what runs and when.
 
 ## Usage
 
@@ -14,45 +14,62 @@ bunx @mrsekut/ccron <command> [options]
 
 ## Claude Code Skill
 
-Install the ccron skill so Claude Code can register tasks from natural language:
+Install the ccron skill so Claude Code can edit `ccron.json` and apply it for you:
 
 ```bash
 bunx skills add mrsekut/ccron
 ```
 
-Then tell Claude: "Schedule a daily summary to Slack at 5pm on weekdays" and it will handle the rest.
-
 ## Quick Start
 
+Put a `ccron.json` in your project, for example at `myproject/ccron/ccron.json`:
+
+```json
+{
+  "jobs": {
+    "member-watch": {
+      "schedule": "0 17 * * 1-5",
+      "prompt": "member-watch スキルを実行して",
+      "cwd": "..",
+      "mcpConfig": "mcp/slack.json"
+    }
+  }
+}
+```
+
 ```bash
-# Register a task
-ccron add \
-  --name daily-summary \
-  --schedule "15 17 * * 1-5" \
-  --prompt "日次サマリーを作成して #daily-summary チャンネルに投稿して" \
-  --mcp-config ~/mcp.json \
-  --cwd ~/src/myproject
-
-# Verify setup
-ccron test daily-summary
-
-# List all tasks
-ccron list
+ccron apply ccron/ccron.json --dry-run   # show the plan
+ccron apply ccron/ccron.json             # make launchd match it
+ccron status ccron/ccron.json            # sync state, last exit, log path
+ccron run member-watch                   # run once now and tail the log
 ```
 
 ## Commands
 
-| Command               | Description                        |
-| --------------------- | ---------------------------------- |
-| `ccron add`           | Register a new scheduled task      |
-| `ccron list`          | List tasks with launchd status     |
-| `ccron show <name>`   | Show detailed task info            |
-| `ccron run <name>`    | Manually trigger and tail log      |
-| `ccron test <name>`   | Run environment checks             |
-| `ccron log <name>`    | Show logs (`--follow` for tail)    |
-| `ccron edit <name>`   | Edit config, regenerate and reload |
-| `ccron auth <name>`   | Re-authenticate MCP servers        |
-| `ccron remove <name>` | Remove task and logs               |
+| Command                                | Description                                                                 |
+| -------------------------------------- | --------------------------------------------------------------------------- |
+| `ccron apply <ccron.json> [--dry-run]` | Create, update, adopt and delete jobs so launchd matches the manifest       |
+| `ccron status <ccron.json>`            | Show each job's sync state, launchd status and log, and other ccron jobs    |
+| `ccron run <name>`                     | Trigger a job now and tail its log                                          |
+
+`apply` validates the whole manifest first and changes nothing if any job is invalid. It is idempotent: if it stops halfway, fix the cause and run it again.
+
+## ccron.json
+
+| Key         | Required | Description                                                              |
+| ----------- | -------- | ------------------------------------------------------------------------ |
+| `schedule`  | yes      | Cron expression (see below)                                              |
+| `prompt`    | yes      | Prompt passed to `claude -p`                                             |
+| `cwd`       | yes      | Directory claude runs in                                                 |
+| `mcpConfig` | no       | MCP config JSON passed to `--mcp-config`                                 |
+
+- `cwd` and `mcpConfig` are resolved against the directory of `ccron.json`.
+- Unknown keys are errors, so a typo cannot be silently ignored.
+- `cwd` must not be under `~/Desktop`, `~/Documents` or `~/Downloads`. macOS TCC blocks claude started from launchd from reading them.
+
+### Keep the prompt a one-liner
+
+`claude` picks up its project context from `cwd`, so the job can use that project's `CLAUDE.md`, `.claude/skills/` and `.mcp.json`. Put the actual instructions in a skill and keep `prompt` a one-liner that invokes it. The instructions stay under version control, and manual runs and scheduled runs share one definition.
 
 ## Schedule Format
 
@@ -67,35 +84,33 @@ Standard cron expression: `"minute hour * * day-of-week"`
 
 Step values (`*/5`) and minute/hour ranges are not supported (launchd limitation).
 
-## Working Directory
+## Ownership
 
-Tasks run in `/tmp` by default. Pass `--cwd` to run in a project directory instead:
+Each generated plist records the manifest that owns it (`CCRON_MANIFEST`, the manifest's real path). Several manifests can coexist on one machine.
 
-```bash
-ccron add --name my-task --schedule "0 9 * * *" --prompt "hello" --cwd ~/src/myproject
+- `apply` deletes only jobs its own manifest created and no longer declares.
+- A job name already owned by another manifest is a conflict, and `apply` changes nothing.
+- A `com.ccron.*` job with no owner (made by hand, or by ccron 0.x) is adopted when a manifest declares the same name. Otherwise it is left alone, and `status` prints a command to remove it.
+
+## Generated Files
+
+```
+~/.local/bin/ccron-<name>.sh                    script launchd runs
+~/Library/LaunchAgents/com.ccron.<name>.plist   launchd job
+~/.local/share/ccron/logs/<name>.log            stdout and stderr (kept when the job is deleted)
 ```
 
-This matters for more than file access. `claude` picks up its project context from the
-directory it starts in, so with `--cwd` the task can also use that project's
-`CLAUDE.md`, `.claude/skills/` and `.mcp.json`.
+## MCP Authentication
 
-That makes it possible to keep the prompt itself in the project as a skill, and have the
-task be a one-liner that invokes it:
+If an MCP server's OAuth token expires, start claude interactively with the same config and sign in again:
 
 ```bash
-ccron add --name member-watch --schedule "0 17 * * 1-5" \
-  --prompt "/member-watch を実行して" \
-  --cwd ~/src/myproject
+claude --mcp-config path/to/mcp.json
 ```
 
-The prompt then lives under version control, and manual runs and scheduled runs share the
-same definition. Without `--cwd`, a task cannot read files outside `/tmp` — it will fail
-with a permission error rather than a missing-file error.
+## Migrating from 0.x
 
-## MCP
-
-Pass your own MCP config JSON file via `--mcp-config`:
-
-```bash
-ccron add --name my-task --schedule "0 9 * * *" --prompt "hello" --mcp-config ~/mcp.json
-```
+1. Write a `ccron.json` that declares the existing tasks under the same names.
+2. `ccron apply ccron.json --dry-run` should show them as `adopt`.
+3. `ccron apply ccron.json`.
+4. Remove `~/.config/ccron/`. 1.0 no longer reads it.
